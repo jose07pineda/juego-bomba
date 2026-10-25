@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Mazmorra Maldita</title>
+<!-- Fuentes de terror (si no hay internet, se usan las de respaldo) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sangre: #b3121a;
+    --sangre-osc: #5a0d10;
+    --sangre-viva: #ff2b2b;
+    --calabaza: #ff7a1a;
+    --hueso: #e8dcc8;
+    --oro: #d4a73a;
+    --piedra: #17110f;
+    --piedra-clara: #231a17;
+    --verde: #4caf6a;
+    --morado: #8a2be2;
+    --titulo: "Creepster", "Chiller", "Impact", fantasy;
+    --corr: 0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Special Elite", Georgia, "Times New Roman", serif;
+    color: var(--hueso);
+    background-color: #0a0607;
+    background-image:
+      linear-gradient(rgba(0,0,0,.6) 3px, transparent 3px),
+      linear-gradient(90deg, rgba(0,0,0,.6) 3px, transparent 3px),
+      radial-gradient(ellipse at 50% 120%, rgba(120,10,10,.28), transparent 60%);
+    background-size: 140px 70px, 140px 70px, 100% 100%;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: "";
+    position: fixed; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 25%, rgba(0,0,0,.92) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+  body::after {
+    content: "";
+    position: fixed; inset: 0;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 40;
+    animation: luzFalla 11s infinite;
+  }
+  @keyframes luzFalla {
+    0%, 90%, 92%, 95%, 100% { opacity: 0; }
+    91% { opacity: .75; }
+    93% { opacity: .55; }
+    94% { opacity: .9; }
+  }
+  body.jefe, body.puerta { background-color: #1a0305; }
+  body.jefe::before, body.puerta::before { background: radial-gradient(ellipse at center, rgba(160,0,0,.22) 15%, rgba(0,0,0,.95) 100%); animation: pulsoJefe 2.2s infinite; }
+  @keyframes pulsoJefe { 50% { opacity: .7; } }
+
+  /* ---------- Ambiente ---------- */
+  #ambiente { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+  .gota {
+    position: absolute; top: -30px;
+    width: 8px; height: 14px;
+    background: radial-gradient(circle at 35% 30%, #e0242c, #7a060c);
+    border-radius: 50% 50% 50% 50% / 65% 65% 35% 35%;
+    opacity: .75;
+    animation: caer linear infinite;
+  }
+  @keyframes caer { to { transform: translateY(108vh); } }
+  .ojos { position: absolute; display: flex; gap: 12px; opacity: 0; animation: ojosAparecen 8s infinite; }
+  .ojos i {
+    width: 15px; height: 7px; border-radius: 50%;
+    background: radial-gradient(circle, #ff5a5a 0%, var(--sangre-viva) 45%, #700 100%);
+    box-shadow: 0 0 12px 3px rgba(255,40,40,.8);
+    transform: rotate(8deg);
+  }
+  .ojos i:last-child { transform: rotate(-8deg); }
+  @keyframes ojosAparecen {
+    0%, 38% { opacity: 0; transform: scaleY(1); }
+    42%, 52% { opacity: 1; transform: scaleY(1); }
+    47% { opacity: 1; transform: scaleY(.08); }
+    58%, 100% { opacity: 0; }
+  }
+  .murcielago { position: absolute; left: -70px; font-size: 26px; opacity: .8; animation: volar linear infinite; }
+  @keyframes volar {
+    0%   { transform: translate(0, 0) scale(1); }
+    25%  { transform: translate(28vw, -40px) scale(1.2); }
+    50%  { transform: translate(55vw, 25px) scale(.9); }
+    75%  { transform: translate(82vw, -30px) scale(1.15); }
+    100% { transform: translate(115vw, 10px) scale(1); }
+  }
+  .tela { position: fixed; font-size: 110px; opacity: .22; z-index: 1; pointer-events: none; filter: grayscale(1); }
+  .tela.a { top: -14px; left: -10px; }
+  .tela.b { top: -14px; right: -10px; transform: scaleX(-1); }
+  .antorcha {
+    position: fixed; top: 40%;
+    font-size: 54px;
+    animation: parpadeo 1s infinite alternate;
+    filter: drop-shadow(0 0 24px #ff5a00) hue-rotate(-12deg);
+    z-index: 1;
+  }
+  .antorcha.izq { left: 3vw; }
+  .antorcha.der { right: 3vw; }
+  @keyframes parpadeo {
+    0%   { transform: scale(1) rotate(-4deg); opacity: .75; }
+    100% { transform: scale(1.14) rotate(4deg); opacity: 1; }
+  }
+  @media (max-width: 760px) { .antorcha { display: none; } .tela { font-size: 70px; } }
+
+  #niebla { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+  #niebla::before, #niebla::after {
+    content: ""; position: absolute; inset: -20%;
+    background:
+      radial-gradient(ellipse at 20% 85%, rgba(210,195,195,.10), transparent 50%),
+      radial-gradient(ellipse at 75% 95%, rgba(210,195,195,.09), transparent 55%),
+      radial-gradient(ellipse at 50% 60%, rgba(160,140,160,.05), transparent 60%);
+    animation: nieblaMover 38s ease-in-out infinite alternate;
+  }
+  #niebla::after { animation-duration: 55s; animation-direction: alternate-reverse; opacity: .8; }
+  @keyframes nieblaMover { from { transform: translateX(-9%) translateY(2%); } to { transform: translateX(9%) translateY(-3%); } }
+
+  #linterna {
+    position: fixed; inset: 0; z-index: 3; pointer-events: none;
+    background: radial-gradient(circle 680px at var(--lx, 50%) var(--ly, 40%), transparent 0%, rgba(0,0,0,.42) 100%);
+  }
+  @media (pointer: coarse) { #linterna { display: none; } }
+
+  /* ---------- CORRUPCIÓN DE LA MAZMORRA ---------- */
+  #app { filter: hue-rotate(calc(var(--corr) * -22deg)) saturate(calc(1 + var(--corr) * .5)); }
+  #corrupcion {
+    position: fixed; inset: 0; z-index: 5; pointer-events: none;
+    opacity: calc(var(--corr) * .6);
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,.38) 0 1px, transparent 1px 4px),
+      radial-gradient(circle at 30% 20%, rgba(120,0,170,.28), transparent 42%),
+      radial-gradient(circle at 80% 70%, rgba(255,0,0,.22), transparent 46%);
+    animation: ruido .4s steps(3) infinite;
+  }
+  @keyframes ruido { 0% { transform: translateY(0); } 33% { transform: translateY(-3px); } 66% { transform: translateY(2px); } 100% { transform: translateY(0); } }
+  #grietas {
+    position: fixed; inset: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none;
+    opacity: 0; transition: opacity 1.5s;
+    filter: drop-shadow(0 0 4px #f00);
+  }
+  body[data-etapa="2"] #grietas { opacity: .55; }
+  body[data-etapa="3"] #grietas { opacity: .95; }
+  body:not([data-etapa="0"]) .tarjeta h1,
+  body:not([data-etapa="0"]) .encabezado-nivel {
+    text-shadow:
+      0 0 18px rgba(255,43,43,.6),
+      3px 3px 0 #2a0305,
+      calc(var(--corr) * 6px) 0 rgba(0,255,255,.5),
+      calc(var(--corr) * -6px) 0 rgba(255,0,200,.5);
+  }
+  body[data-etapa="2"] .tarjeta h1, body[data-etapa="3"] .tarjeta h1 { animation-duration: 1.3s; }
+  body.glitch #app { animation: glitchApp .3s steps(2) 1; }
+  @keyframes glitchApp {
+    0%   { transform: translate(0); clip-path: inset(0 0 0 0); }
+    20%  { transform: translate(-9px, 2px) skewX(6deg); clip-path: inset(10% 0 55% 0); }
+    40%  { transform: translate(8px, -3px) skewX(-6deg); clip-path: inset(50% 0 15% 0); filter: hue-rotate(90deg) saturate(2.4); }
+    60%  { transform: translate(-4px, 1px); clip-path: inset(0 0 0 0); }
+    80%  { transform: translate(6px, 0) skewX(3deg); clip-path: inset(25% 0 30% 0); }
+    100% { transform: none; clip-path: inset(0 0 0 0); }
+  }
+
+  /* Fuego del infierno (corrupción alta, puerta y jefe) */
+  #infierno {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 150px; z-index: 1; pointer-events: none;
+    opacity: 0; transition: opacity 2s;
+    background: linear-gradient(to top, rgba(255,70,0,.55), rgba(180,0,0,.25) 45%, transparent);
+    display: flex; justify-content: space-around; align-items: flex-end; overflow: hidden;
+  }
+  body[data-etapa="3"] #infierno, body.jefe #infierno, body.puerta #infierno { opacity: 1; }
+  .llama { font-size: 54px; transform-origin: bottom center; filter: drop-shadow(0 0 12px #ff5a00); animation: llamear .7s infinite alternate ease-in-out; }
+  @keyframes llamear {
+    from { transform: scaleY(.85) scaleX(.95) rotate(-3deg); }
+    to   { transform: scaleY(1.25) scaleX(1.05) rotate(3deg); }
+  }
+
+  #app {
+    position: relative; z-index: 2;
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 16px 14px 76px;
+    min-height: 100%;
+  }
+
+  /* ---------- HUD ---------- */
+  #hud {
+    display: flex; flex-direction: column; gap: 8px;
+    background: rgba(12,7,8,.92);
+    border: 2px solid var(--sangre-osc);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 22px rgba(0,0,0,.8), 0 0 18px rgba(179,18,26,.25);
+  }
+  #hud[hidden] { display: none; }
+  .hud-fila { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+  .progreso { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .punto {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 14px; font-weight: bold;
+    background: #261a1a; color: #6d5a5a;
+    border: 2px solid #3a2626;
+  }
+  .punto.actual { background: var(--calabaza); color: #2a0e00; border-color: #ffd0a0; box-shadow: 0 0 14px var(--calabaza); }
+  .punto.hecho { background: #3b1a1c; color: #c9a9a9; border-color: var(--sangre); }
+  .punto.llave, .punto.jefe-punto { font-size: 17px; background: #1c1313; }
+  .punto.llave.tiene { background: var(--oro); box-shadow: 0 0 16px var(--oro); }
+  .punto.jefe-punto.actual { background: var(--sangre); border-color: #ff9a9a; box-shadow: 0 0 16px var(--sangre-viva); }
+  .vidas { font-size: 24px; letter-spacing: 3px; white-space: nowrap; position: relative; }
+  .vida { display: inline-block; }
+  .vida.recien { animation: romperVida 1s; }
+  @keyframes romperVida {
+    0%   { transform: scale(2.4) rotate(0); filter: brightness(3) drop-shadow(0 0 14px red); }
+    25%  { transform: scale(1.4) rotate(-28deg); }
+    50%  { transform: scale(1.5) rotate(28deg); }
+    100% { transform: scale(1) rotate(0); filter: none; }
+  }
+  .menos-uno {
+    position: absolute; right: 0; top: 26px;
+    font-family: var(--titulo); letter-spacing: 1px; font-size: 32px;
+    color: var(--sangre-viva); text-shadow: 0 0 12px #f00;
+    animation: bajarMenos 1.2s forwards; pointer-events: none; white-space: nowrap;
+  }
+  @keyframes bajarMenos { from { transform: translateY(0); opacity: 1; } to { transform: translateY(40px); opacity: 0; } }
+  #btn-sonido {
+    background: none; border: 2px solid var(--sangre-osc); color: var(--hueso);
+    border-radius: 8px; padding: 4px 8px; font-size: 18px; cursor: pointer;
+  }
+  .hud-fila2 { border-top: 1px dashed rgba(179,18,26,.35); padding-top: 8px; }
+  .corr-wrap { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+  .corr-bar { width: 120px; height: 12px; background: #060303; border: 2px solid #4a1a5a; border-radius: 8px; overflow: hidden; }
+  #corr-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--morado), var(--sangre-viva)); transition: width .6s; }
+  #corr-etapa { font-size: 13px; color: #c9a0ff; min-width: 74px; }
+  .codigo-hud { display: flex; align-items: center; gap: 5px; }
+  .codigo-etiqueta { font-size: 13px; color: var(--oro); margin-right: 3px; }
+  .slot {
+    width: 24px; height: 30px; display: grid; place-items: center;
+    background: #120c0c; border: 2px solid #5c4a1a; border-radius: 6px;
+    font-family: "Courier New", monospace; font-size: 17px; color: #6d5a5a;
+  }
+  .slot.lleno { color: #ffe27a; border-color: var(--oro); box-shadow: 0 0 8px rgba(212,167,58,.6); }
+
+  /* ---------- Tarjetas y botones ---------- */
+  .tarjeta {
+    position: relative;
+    background: linear-gradient(180deg, var(--piedra-clara), var(--piedra) 70%, #0d0808);
+    border: 3px solid var(--sangre-osc);
+    border-radius: 14px;
+    padding: 30px 22px 26px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,.85), 0 0 30px rgba(179,18,26,.3), inset 0 0 50px rgba(0,0,0,.65);
+    animation: aparecer .6s ease;
+  }
+  .tarjeta::before {
+    content: "";
+    position: absolute; left: -3px; right: -3px; top: -3px; height: 38px;
+    background:
+      radial-gradient(circle at 8%  100%, var(--sangre) 0 9px, transparent 10px),
+      radial-gradient(circle at 23% 100%, var(--sangre) 0 7px, transparent 8px),
+      radial-gradient(circle at 41% 100%, var(--sangre) 0 11px, transparent 12px),
+      radial-gradient(circle at 58% 100%, var(--sangre) 0 8px, transparent 9px),
+      radial-gradient(circle at 77% 100%, var(--sangre) 0 10px, transparent 11px),
+      radial-gradient(circle at 92% 100%, var(--sangre) 0 7px, transparent 8px),
+      linear-gradient(var(--sangre), var(--sangre)) top / 100% 12px no-repeat;
+    border-radius: 12px 12px 0 0;
+    pointer-events: none;
+  }
+  @keyframes aparecer {
+    0% { opacity: 0; transform: translateY(16px) scale(.97); filter: blur(4px); }
+    100% { opacity: 1; transform: none; filter: none; }
+  }
+  .tarjeta h1 {
+    font-family: var(--titulo); font-weight: normal; letter-spacing: 2px;
+    font-size: clamp(36px, 7vw, 58px);
+    color: var(--sangre-viva);
+    text-shadow: 0 0 18px rgba(255,43,43,.6), 3px 3px 0 #2a0305;
+    margin: 8px 0 10px;
+    animation: temblar 3.4s infinite;
+  }
+  @keyframes temblar {
+    0%, 92%, 100% { transform: translate(0); }
+    93% { transform: translate(-3px, 1px) skewX(4deg); }
+    95% { transform: translate(3px, -1px) skewX(-4deg); }
+    97% { transform: translate(-2px, 0); }
+  }
+  .tarjeta h2 { font-family: var(--titulo); font-weight: normal; letter-spacing: 2px; font-size: 26px; color: var(--calabaza); margin-bottom: 4px; text-shadow: 0 0 12px rgba(255,122,26,.45); }
+  .tarjeta p { line-height: 1.55; margin: 8px 0; font-size: 18px; }
+  .grande { font-size: 80px; margin: 6px 0; filter: drop-shadow(0 0 18px rgba(255,43,43,.55)); animation: flotar 3s infinite ease-in-out; }
+  @keyframes flotar { 50% { transform: translateY(-8px) rotate(3deg); } }
+  .reglas { text-align: left; max-width: 560px; margin: 14px auto; list-style: none; }
+  .reglas li { padding: 6px 0; font-size: 16px; line-height: 1.4; border-bottom: 1px dashed rgba(179,18,26,.3); }
+  .datos { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
+  .dato { background: rgba(0,0,0,.5); border: 1px solid var(--sangre-osc); border-radius: 8px; padding: 8px 14px; font-size: 16px; }
+  .nota-corr {
+    border: 1px dashed var(--morado); background: rgba(60,0,80,.28);
+    border-radius: 8px; padding: 8px 12px; margin: 10px auto; max-width: 560px;
+    font-size: 15px; line-height: 1.45; color: #e2c4ff;
+  }
+  .admin-cita {
+    max-width: 560px; margin: 10px auto; padding: 8px 12px;
+    font-family: "Courier New", monospace; font-size: 14px; text-align: left;
+    color: #ff9ad5; background: rgba(0,0,0,.45); border-left: 3px solid var(--sangre);
+  }
+
+  .btn {
+    margin-top: 16px;
+    font-family: var(--titulo); letter-spacing: 2px; font-size: 26px;
+    padding: 10px 32px;
+    color: var(--hueso);
+    background: linear-gradient(180deg, #c4161f, #6b0a10);
+    border: 3px solid #1a0204;
+    outline: 2px solid var(--sangre);
+    border-radius: 10px;
+    cursor: pointer;
+    text-shadow: 2px 2px 0 #1a0204;
+    box-shadow: 0 5px 0 #2c0408, 0 0 22px rgba(255,43,43,.4);
+    transition: transform .08s, box-shadow .08s, filter .15s;
+  }
+  .btn:hover { transform: translateY(-2px); filter: brightness(1.2); box-shadow: 0 7px 0 #2c0408, 0 0 32px rgba(255,43,43,.7); }
+  .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #2c0408; }
+  .btn-mini {
+    font-family: inherit; font-size: 15px; padding: 8px 14px; margin-top: 10px;
+    color: #d9b8ff; background: #1a0f22; border: 2px dashed #6a3a8a; border-radius: 8px; cursor: pointer;
+  }
+  .btn-mini:hover:not(:disabled) { background: #28163a; border-color: #b57aff; }
+  .btn-mini:disabled { opacity: .4; cursor: default; }
+
+  /* ---------- Zona de juego ---------- */
+  .juego { text-align: center; }
+  .encabezado-nivel { font-family: var(--titulo); letter-spacing: 2px; font-size: 28px; color: var(--calabaza); text-shadow: 0 0 14px rgba(255,122,26,.5); }
+  .tema-nivel { font-size: 15px; color: #b99d96; margin-bottom: 4px; }
+  .jefe .encabezado-nivel { color: var(--sangre-viva); text-shadow: 0 0 16px rgba(255,43,43,.7); }
+  .zona-bomba { position: relative; display: flex; align-items: center; justify-content: center; gap: 22px; flex-wrap: wrap; margin: 6px 0 10px; }
+  #bomba { width: 160px; height: 160px; overflow: visible; filter: drop-shadow(0 0 12px rgba(179,18,26,.6)); }
+  #bomba .ojo-b { fill: #8a1218; filter: drop-shadow(0 0 3px #ff2b2b); }
+  #bomba.peligro { animation: latido .55s infinite; filter: drop-shadow(0 0 22px var(--sangre-viva)); }
+  #bomba.peligro .ojo-b { fill: var(--sangre-viva); filter: drop-shadow(0 0 8px #ff0000); }
+  @keyframes latido { 50% { transform: scale(1.12) rotate(-2deg); } }
+  #bomba.enojada { animation: bombaEnojada .5s; }
+  #bomba.enojada .ojo-b { fill: var(--sangre-viva); filter: drop-shadow(0 0 10px #ff0000); }
+  @keyframes bombaEnojada {
+    0%, 100% { transform: scale(1); }
+    20% { transform: scale(1.25) rotate(-8deg); }
+    40% { transform: scale(1.2) rotate(8deg); }
+    60% { transform: scale(1.25) rotate(-6deg); }
+    80% { transform: scale(1.15) rotate(4deg); }
+  }
+  #chispa { animation: chispa .12s infinite alternate; }
+  @keyframes chispa { to { opacity: .5; } }
+
+  .reloj { min-width: 220px; }
+  #tiempo, #t-puerta {
+    font-family: var(--titulo); letter-spacing: 3px;
+    font-size: 68px; font-variant-numeric: tabular-nums;
+    position: relative; display: inline-block;
+    color: var(--hueso);
+    text-shadow: 0 0 14px rgba(255,255,255,.25);
+  }
+  #tiempo.rojo, #t-puerta.rojo { color: var(--sangre-viva); text-shadow: 0 0 22px var(--sangre-viva); animation: temblar 0.6s infinite; }
+  .barra { height: 14px; background: #060303; border: 2px solid var(--sangre-osc); border-radius: 10px; overflow: hidden; margin-top: 2px; }
+  #barra-tiempo, #barra-puerta { height: 100%; width: 100%; background: linear-gradient(90deg, #ff9a3c, var(--calabaza)); transition: width .1s linear; }
+  #barra-tiempo.rojo, #barra-puerta.rojo { background: linear-gradient(90deg, #ff4b4b, #a00); }
+
+  .jefe-info { margin: 4px 0 10px; }
+  .jefe-emoji { font-size: 70px; display: inline-block; filter: drop-shadow(0 0 20px var(--sangre-viva)); animation: respirar 1.8s infinite ease-in-out; }
+  .jefe-emoji.golpe { animation: golpe .45s; }
+  @keyframes respirar { 50% { transform: scale(1.1); } }
+  @keyframes golpe { 30% { transform: translateX(-14px) rotate(-8deg); filter: brightness(3); } 70% { transform: translateX(14px) rotate(8deg); } }
+  .jefe-nombre { font-family: var(--titulo); letter-spacing: 2px; font-size: 20px; color: #ff8d86; margin-bottom: 4px; }
+  .vida-jefe { max-width: 320px; margin: 0 auto; height: 16px; background: #060303; border: 2px solid var(--sangre); border-radius: 10px; overflow: hidden; }
+  #hp-jefe { height: 100%; width: 100%; background: linear-gradient(90deg, #ff4b4b, #7a0000); transition: width .5s; }
+
+  .caja-pregunta {
+    background: rgba(0,0,0,.55);
+    border: 2px solid var(--sangre-osc);
+    border-radius: 12px;
+    padding: 18px 16px 20px;
+    box-shadow: inset 0 0 30px rgba(0,0,0,.7);
+  }
+  .caja-pregunta.llave { border-color: var(--oro); box-shadow: inset 0 0 30px rgba(0,0,0,.7), 0 0 22px rgba(212,167,58,.4); }
+  .insignia-llave {
+    display: inline-block; background: var(--oro); color: #2a1d05;
+    padding: 3px 14px; border-radius: 20px; font-size: 14px; font-weight: bold; margin-bottom: 8px;
+    animation: pulsoOro 1.4s infinite alternate;
+  }
+  @keyframes pulsoOro { from { box-shadow: 0 0 6px var(--oro); } to { box-shadow: 0 0 22px #ffe27a; } }
+  .pregunta-num { color: #a88f88; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+  .pregunta { font-size: clamp(19px, 3.5vw, 25px); line-height: 1.35; margin-bottom: 16px; color: var(--hueso) !important; font-weight: normal; animation: preguntaEntra .5s ease; }
+  @keyframes preguntaEntra {
+    from { opacity: 0; filter: blur(6px); transform: translateY(8px) skewX(-3deg); }
+    to   { opacity: 1; filter: none; transform: none; }
+  }
+  .opciones { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 560px) { .opciones { grid-template-columns: 1fr; } }
+  .opcion {
+    font-family: inherit; font-size: 18px;
+    padding: 14px 12px;
+    color: var(--hueso);
+    background: linear-gradient(180deg, #2a1b1a, #170d0d);
+    border: 2px solid #4a2626;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform .08s, border-color .15s, background .15s, box-shadow .15s;
+    animation: opcionEntra .45s backwards;
+    animation-delay: calc(var(--i, 0) * 90ms + 150ms);
+  }
+  @keyframes opcionEntra {
+    from { opacity: 0; transform: translateX(-18px) scale(.95); }
+    to   { opacity: 1; transform: none; }
+  }
+  .opcion:hover:not(:disabled) { border-color: var(--sangre-viva); transform: translateY(-2px); box-shadow: 0 0 16px rgba(255,43,43,.4); background: linear-gradient(180deg, #3a1d1d, #1f0e0e); }
+  .opcion:disabled { cursor: default; }
+  .opcion.bien { background: #123d24; border-color: var(--verde); box-shadow: 0 0 16px rgba(76,175,106,.5); }
+  .opcion.mal { background: #4d0a0d; border-color: var(--sangre-viva); animation: temblor .35s; }
+  .opcion.descartada { opacity: .25; text-decoration: line-through; }
+  @keyframes temblor { 25% { transform: translateX(-7px); } 75% { transform: translateX(7px); } }
+  .comodines { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .sin-pactos { margin-top: 12px; font-size: 14px; color: #ff8d86; }
+
+  /* ---------- Efectos ---------- */
+  #alerta { position: fixed; inset: 0; z-index: 39; pointer-events: none; }
+  body.alerta #alerta { animation: alertaPulso .9s infinite; }
+  @keyframes alertaPulso {
+    0%, 100% { box-shadow: inset 0 0 90px 10px rgba(255,0,0,.15); }
+    50%      { box-shadow: inset 0 0 170px 50px rgba(255,0,0,.6); }
+  }
+  #dano {
+    position: fixed; inset: 0; z-index: 44; pointer-events: none; opacity: 0;
+    background:
+      radial-gradient(circle at 14% 24%, rgba(190,0,0,.8) 0 60px, transparent 62px),
+      radial-gradient(circle at 84% 18%, rgba(170,0,0,.8) 0 48px, transparent 50px),
+      radial-gradient(circle at 72% 78%, rgba(200,0,0,.8) 0 70px, transparent 72px),
+      radial-gradient(circle at 22% 82%, rgba(160,0,0,.8) 0 42px, transparent 44px),
+      radial-gradient(circle, transparent 25%, rgba(170,0,0,.85) 100%);
+  }
+  #dano.activo { animation: danoFlash .95s ease-out forwards; }
+  @keyframes danoFlash { 0% { opacity: 1; } 100% { opacity: 0; } }
+  #susto {
+    position: fixed; inset: 0; z-index: 45; pointer-events: none;
+    display: none; place-items: center; font-size: 62vmin;
+    filter: drop-shadow(0 0 40px #f00) saturate(1.4);
+  }
+  #susto.activo { display: grid; animation: sustoAnim .6s ease-out forwards; }
+  @keyframes sustoAnim {
+    0%   { opacity: 0; transform: scale(.4); }
+    15%  { opacity: .9; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.6); }
+  }
+  #rayo { position: fixed; inset: 0; z-index: 38; pointer-events: none; background: #e8f0ff; opacity: 0; }
+  #rayo.activo { animation: rayoAnim .7s linear forwards; }
+  @keyframes rayoAnim {
+    0% { opacity: 0; } 5% { opacity: .8; } 12% { opacity: .1; }
+    20% { opacity: .65; } 40% { opacity: 0; } 100% { opacity: 0; }
+  }
+  .particula { position: fixed; z-index: 60; pointer-events: none; transform: translate(-50%, -50%); animation: volarP 1.05s ease-out forwards; }
+  @keyframes volarP {
+    0%   { opacity: 1; transform: translate(-50%, -50%) scale(.5); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)) scale(1.3); }
+  }
+  #flash {
+    position: fixed; inset: 0; z-index: 50;
+    display: none; place-items: center;
+    font-size: 42vmin;
+    background: radial-gradient(circle, #fff3b0 0%, #ff7a00 30%, #a80000 75%, #1a0000 100%);
+  }
+  #flash.activo { display: grid; animation: explosion 1.4s ease-out forwards; }
+  @keyframes explosion {
+    0% { opacity: 1; transform: scale(.3); }
+    25% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.5); }
+  }
+  body.sacudir #app { animation: sacudir .6s; }
+  @keyframes sacudir {
+    10%, 50%, 90% { transform: translate(-12px, 7px); }
+    30%, 70% { transform: translate(12px, -7px); }
+  }
+
+  /* ---------- Administrador: burbuja y consola ---------- */
+  #admin-burbuja {
+    position: fixed; left: 50%; bottom: 56px; transform: translate(-50%, 20px);
+    width: min(640px, 92vw); z-index: 46;
+    background: rgba(8,3,3,.95); border: 2px solid var(--sangre); border-radius: 10px;
+    padding: 10px 14px; font-size: 16px; line-height: 1.4;
+    box-shadow: 0 0 22px rgba(179,18,26,.55);
+    opacity: 0; pointer-events: none; transition: opacity .3s, transform .3s;
+  }
+  #admin-burbuja.visible { opacity: 1; transform: translate(-50%, 0); }
+  .admin-nombre { display: block; font-family: var(--titulo); letter-spacing: 2px; color: var(--sangre-viva); font-size: 18px; }
+  #admin-texto::after { content: "▌"; color: var(--sangre-viva); animation: cursor .8s steps(1) infinite; }
+  @keyframes cursor { 50% { opacity: 0; } }
+  #consola {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: min(780px, 100%); z-index: 43;
+    font-family: "Courier New", monospace; font-size: 13px;
+    background: rgba(0,0,0,.95); color: #5cff7a;
+    border: 1px solid #1d5a2b; border-bottom: none; border-radius: 8px 8px 0 0;
+  }
+  #consola-cab { display: flex; gap: 10px; align-items: center; padding: 8px 12px; cursor: pointer; white-space: nowrap; overflow: hidden; }
+  #consola-ultima { flex: 1; overflow: hidden; text-overflow: ellipsis; opacity: .85; }
+  #consola-lineas { max-height: 170px; overflow-y: auto; padding: 4px 12px 8px; border-top: 1px solid #123d1c; }
+  #consola.cerrada #consola-lineas { display: none; }
+  .l-INFO { color: #5cff7a; }
+  .l-WARN { color: #ffb347; }
+  .l-ERROR { color: #ff5a5a; }
+  .l-ADMIN { color: #ff9ad5; }
+
+  /* ---------- Llave / código ---------- */
+  .llave { font-size: 100px; display: inline-block; animation: brillo 1.4s infinite alternate; }
+  @keyframes brillo {
+    from { filter: drop-shadow(0 0 6px #d4a73a); transform: rotate(-8deg) scale(1); }
+    to   { filter: drop-shadow(0 0 30px #ffe27a); transform: rotate(8deg) scale(1.12); }
+  }
+  .fragmento { display: inline-flex; align-items: center; gap: 14px; font-family: var(--titulo); font-size: 60px; color: #ffe27a; text-shadow: 0 0 22px var(--oro); margin: 6px 0; }
+  .fragmento span {
+    background: #120c0c; border: 3px solid var(--oro); border-radius: 10px; padding: 0 24px;
+    box-shadow: 0 0 24px rgba(212,167,58,.6); animation: pulsoOro 1.4s infinite alternate;
+  }
+  .codigo-grande { display: flex; justify-content: center; gap: 10px; margin: 12px 0; flex-wrap: wrap; }
+  .slot-g {
+    width: 56px; height: 72px; display: grid; place-items: center;
+    background: #120c0c; border: 3px solid var(--oro); border-radius: 10px;
+    font-family: "Courier New", monospace; font-size: 42px; color: #ffe27a;
+    box-shadow: 0 0 18px rgba(212,167,58,.55);
+  }
+  .slot-g.vacio { border-color: #4a3a1a; color: #5c4a2a; box-shadow: none; }
+
+  /* ---------- Puerta del Infierno ---------- */
+  .puerta-card {
+    border-color: #8a0a10;
+    box-shadow: 0 10px 40px rgba(0,0,0,.9), 0 0 50px rgba(255,60,0,.45), inset 0 0 60px rgba(120,0,0,.5);
+    animation: aparecer .6s ease, fuegoBorde 2.4s infinite alternate .6s;
+  }
+  @keyframes fuegoBorde {
+    from { box-shadow: 0 10px 40px rgba(0,0,0,.9), 0 0 30px rgba(255,60,0,.3), inset 0 0 60px rgba(120,0,0,.5); }
+    to   { box-shadow: 0 10px 40px rgba(0,0,0,.9), 0 0 80px rgba(255,60,0,.75), inset 0 0 70px rgba(160,0,0,.6); }
+  }
+  .puerta-svg { width: min(230px, 60%); margin: 4px auto; display: block; filter: drop-shadow(0 0 22px rgba(255,60,0,.65)); overflow: visible; }
+  .hoja { transition: transform 1.5s cubic-bezier(.6,0,.3,1), opacity 1.5s; }
+  .puerta-svg.abierta .hoja.izq { transform: translateX(-95px); opacity: .1; }
+  .puerta-svg.abierta .hoja.der { transform: translateX(95px); opacity: .1; }
+  .luz-puerta { opacity: .2; transition: opacity 1.4s; }
+  .puerta-svg.abierta .luz-puerta { opacity: 1; }
+  .cadenas, .penta { transition: opacity .9s; }
+  .puerta-svg.abierta .cadenas, .puerta-svg.abierta .penta { opacity: 0; }
+  .penta polygon, .penta circle { animation: brasaPenta 1.2s infinite alternate; }
+  @keyframes brasaPenta { from { opacity: .55; } to { opacity: 1; } }
+  .reloj-puerta { margin-top: 4px; }
+  .slots-codigo { display: flex; justify-content: center; gap: 10px; margin: 12px 0 6px; }
+  .dig {
+    width: 50px; height: 62px; display: grid; place-items: center;
+    background: #0d0505; border: 3px solid #5a0d10; border-radius: 10px;
+    font-family: "Courier New", monospace; font-size: 34px; color: #ffe27a;
+  }
+  .dig.activo { border-color: var(--sangre-viva); box-shadow: 0 0 14px rgba(255,43,43,.7); }
+  #msg-puerta { min-height: 28px; font-size: 17px; }
+  .teclado { display: grid; grid-template-columns: repeat(3, 70px); gap: 8px; justify-content: center; margin: 8px auto; }
+  .tecla {
+    font-family: "Courier New", monospace; font-size: 24px; font-weight: bold; padding: 12px 0;
+    color: var(--hueso); background: linear-gradient(180deg, #3a1d1d, #1a0c0c);
+    border: 2px solid #6b1a1a; border-radius: 8px; cursor: pointer;
+  }
+  .tecla:hover { border-color: var(--sangre-viva); box-shadow: 0 0 14px rgba(255,43,43,.5); }
+  .tecla:active { transform: translateY(2px); }
+
+  .traza {
+    text-align: left; font-family: "Courier New", monospace; font-size: 13px;
+    background: #050505; color: #ff6b6b; border: 1px solid var(--sangre-osc); border-radius: 8px;
+    padding: 10px 12px; margin: 12px auto; max-width: 600px; overflow-x: auto; white-space: pre-wrap; line-height: 1.45;
+  }
+
+  /* ---------- Trofeo ---------- */
+  .trofeo { font-size: 110px; display: inline-block; animation: brillo 1.6s infinite alternate; }
+  .rompecabezas { width: min(420px, 90%); margin: 8px auto; display: block; overflow: visible; }
+  .pieza { transition: transform 1.4s cubic-bezier(.3,1.4,.5,1); }
+  .pieza.sep-izq { transform: translateX(-34px) rotate(-6deg); }
+  .pieza.sep-der { transform: translateX(34px) rotate(6deg); }
+  .pieza-texto { font-family: Georgia, serif; font-size: 15px; font-weight: bold; fill: #1a0a05; }
+  .game-over h1 { color: var(--sangre-viva); font-size: clamp(48px, 10vw, 84px); }
+</style>
+</head>
+<body>
+
+<div id="ambiente"></div>
+<div class="tela a">🕸️</div>
+<div class="tela b">🕸️</div>
+<div class="antorcha izq">🔥</div>
+<div class="antorcha der">🔥</div>
+<div id="niebla"></div>
+<div id="linterna"></div>
+<div id="corrupcion"></div>
+<svg id="grietas" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+  <g fill="none" stroke="#ff2b2b" stroke-width="1.6" stroke-linejoin="bevel">
+    <polyline vector-effect="non-scaling-stroke" points="0,18 8,22 6,30 15,34 12,44 22,50"/>
+    <polyline vector-effect="non-scaling-stroke" points="100,12 91,20 94,28 84,33 88,43"/>
+    <polyline vector-effect="non-scaling-stroke" points="0,78 9,74 7,66 17,62"/>
+    <polyline vector-effect="non-scaling-stroke" points="100,86 90,82 93,73 82,70 86,60 78,55"/>
+    <polyline vector-effect="non-scaling-stroke" points="40,0 43,7 38,12 44,20"/>
+    <polyline vector-effect="non-scaling-stroke" points="62,100 58,92 64,86 59,78"/>
+  </g>
+</svg>
+<div id="infierno"></div>
+<div id="alerta"></div>
+<div id="rayo"></div>
+<div id="dano"></div>
+<div id="susto">💀</div>
+<div id="flash">💥</div>
+
+<div id="app">
+  <div id="hud" hidden>
+    <div class="hud-fila">
+      <div class="progreso" id="progreso"></div>
+      <div class="vidas" id="vidas"></div>
+      <button id="btn-sonido" title="Activar / silenciar sonido">🔊</button>
+    </div>
+    <div class="hud-fila hud-fila2">
+      <div class="corr-wrap" title="Corrupción de la mazmorra">
+        <span>☣️</span>
+        <div class="corr-bar"><div id="corr-fill"></div></div>
+        <b id="corr-txt">0%</b>
+        <span id="corr-etapa">Estable</span>
+      </div>
+      <div class="codigo-hud" id="codigo-hud" title="Código de la llave"></div>
+    </div>
+  </div>
+  <main id="pantalla"></main>
+</div>
+
+<div id="admin-burbuja"></div>
+<div id="consola" class="cerrada">
+  <div id="consola-cab">
+    <span>📟 consola_admin.log</span>
+    <span id="consola-ultima"></span>
+    <span id="consola-flecha">▲</span>
+  </div>
+  <div id="consola-lineas"></div>
+</div>
+
+<script>
+/* =====================================================================
+   CONFIGURACIÓN DEL JUEGO  (aquí puedes editar todo fácilmente)
+   ---------------------------------------------------------------------
+   - tiempo: segundos que tiene el nivel para responder TODAS las preguntas
+   - preguntas: { p: pregunta, r: [opciones], c: posición de la correcta (0 = la primera) }
+     (las opciones se mezclan solas cada vez que sale la pregunta)
+   - llave: true  → es la «Pregunta de la Llave» (la última de la sala, revela un dígito del código)
+   ===================================================================== */
+const VIDAS_INICIALES = 3;
+const VIDAS_POR_ERROR = 1;           // vidas que se pierden por cada respuesta incorrecta
+// Si se acaba el tiempo: la bomba explota, se pierde 1 vida y la sala se reinicia.
+
+// --- Corrupción (0 a 100 %). Nunca baja durante la partida. ---
+const CORRUPCION_ERROR = 10;         // por cada respuesta incorrecta
+const CORRUPCION_BOMBA = 20;         // por cada bomba que explota
+const CORRUPCION_CODIGO = 8;         // por cada código incorrecto en la puerta
+const CORRUPCION_5050 = 5;           // comodín 50/50
+const CORRUPCION_TIEMPO = 8;         // comodín +tiempo
+const CORRUPCION_REVELAR = 5;        // revelar el código en la puerta
+const SEGUNDOS_EXTRA_COMODIN = 10;
+
+// --- La llave es un código ---
+const LARGO_CODIGO = 5;              // dígitos (uno por sala)
+const TIEMPO_PUERTA = 45;            // segundos para teclear el código
+const INTENTOS_CODIGO = 3;           // intentos antes de que explote la cerradura
+
+// --- Cómo la corrupción endurece la puerta final ---
+const CORRUPCION_POR_PREGUNTA_EXTRA = 20;   // cada 20 % → +1 pregunta
+const SEGUNDOS_MENOS_POR_PUNTO = 0.5;       // cada 1 % → −0,5 s
+const TIEMPO_MINIMO_JEFE = 45;
+
+const NIVELES = [
+  {
+    nombre: "El Cementerio de los Bugs", emoji: "🪦", tema: "🎃 Halloween + 🐛 Análisis de software", tiempo: 90,
+    admin: "Sala 1. Aquí enterré mis primeros bugs. Algunos todavía se mueven.",
+    preguntas: [
+      { p: "¿Qué antigua festividad celta es el origen de Halloween?", r: ["Samhain", "Beltane", "Imbolc", "Lughnasadh"], c: 0 },
+      { p: "¿Qué insecto hallado en un relé del Harvard Mark II (1947) popularizó la palabra «bug» para los errores informáticos?", r: ["Una polilla", "Una cucaracha", "Una hormiga", "Una araña"], c: 0 },
+      { p: "En análisis de requisitos, ¿cómo se llama el requisito que describe una cualidad del sistema (rendimiento, seguridad, usabilidad) y no una función concreta?", r: ["Requisito no funcional", "Requisito funcional", "Caso de uso", "Historia de usuario"], c: 0 },
+      { p: "¿Qué modelo de ciclo de vida, propuesto por Barry Boehm, organiza el desarrollo en iteraciones centradas en el análisis de riesgos?", r: ["Modelo en espiral", "Modelo en cascada", "Modelo en V", "Prototipado desechable"], c: 0 },
+      { llave: true, p: "¿Qué técnica de cifrado, atribuida a Julio César, desplaza cada letra un número fijo de posiciones del alfabeto?", r: ["Cifrado César", "Cifrado Vigenère", "Máquina Enigma", "Cifrado Playfair"], c: 0 }
+    ]
+  },
+  {
+    nombre: "La Biblioteca de los Requisitos Malditos", emoji: "📜", tema: "📜 Historia + 📐 Requisitos y UML", tiempo: 85,
+    admin: "Sala 2. Los requisitos cambiaron a mitad del proyecto… y a mitad de tu vida.",
+    preguntas: [
+      { p: "¿Qué tratado de 1494 repartió el Nuevo Mundo entre España y Portugal?", r: ["Tordesillas", "Utrecht", "Westfalia", "Versalles"], c: 0 },
+      { p: "¿Qué cohete europeo se autodestruyó en 1996, segundos después de despegar, por un desbordamiento al convertir un número de 64 bits a uno de 16 bits?", r: ["Ariane 5", "Ariane 4", "Vega", "Soyuz"], c: 0 },
+      { p: "En UML, ¿qué diagrama muestra la interacción entre objetos como mensajes ordenados en el tiempo?", r: ["Diagrama de secuencia", "Diagrama de clases", "Diagrama de componentes", "Diagrama de estados"], c: 0 },
+      { p: "¿Qué trío de autores es conocido como «los tres amigos» por crear UML?", r: ["Booch, Rumbaugh y Jacobson", "Gamma, Helm y Johnson", "Kernighan, Ritchie y Thompson", "Beck, Fowler y Martin"], c: 0 },
+      { llave: true, p: "¿Qué algoritmo de clave pública, creado en los años setenta, basa su seguridad en la dificultad de factorizar números primos enormes?", r: ["RSA", "AES", "DES", "SHA-256"], c: 0 }
+    ]
+  },
+  {
+    nombre: "El Laboratorio del Código Maldito", emoji: "🤖", tema: "🤖 Inteligencia artificial + 🧪 Pruebas de software", tiempo: 80,
+    admin: "Sala 3. Aquí entrené modelos y probé cosas que nunca debieron compilar.",
+    preguntas: [
+      { p: "¿Cómo se llamaba el primer chatbot de la historia, creado en el MIT en 1966?", r: ["ELIZA", "ALICE", "PARRY", "SHRDLU"], c: 0 },
+      { p: "¿Qué arquitectura presentó el artículo «Attention Is All You Need» en 2017?", r: ["Transformer", "LSTM", "Red convolucional", "Perceptrón multicapa"], c: 0 },
+      { p: "En pruebas de caja negra, ¿qué técnica divide las entradas en grupos de los que se espera el mismo comportamiento y prueba un representante de cada grupo?", r: ["Partición de equivalencia", "Análisis de valores límite", "Cobertura de sentencias", "Pruebas de mutación"], c: 0 },
+      { p: "¿Qué pruebas se repiten tras cada cambio para comprobar que no se rompió lo que ya funcionaba?", r: ["Pruebas de regresión", "Pruebas de humo", "Pruebas de aceptación", "Pruebas de estrés"], c: 0 },
+      { llave: true, p: "¿Qué longitud tiene siempre el resumen (hash) que produce la función criptográfica SHA-256?", r: ["256 bits", "128 bits", "512 bits", "160 bits"], c: 0 }
+    ]
+  },
+  {
+    nombre: "La Cripta de los Patrones Oscuros", emoji: "🧟", tema: "🧟 Terror + 🧱 Diseño y arquitectura", tiempo: 75,
+    admin: "Sala 4. Patrones de diseño… y patrones de pesadilla. Respira hondo.",
+    preguntas: [
+      { p: "¿Qué volcán provocó el «año sin verano» de 1816, durante el cual nació la idea de «Frankenstein»?", r: ["Tambora", "Krakatoa", "Vesubio", "Santorini"], c: 0 },
+      { p: "¿Qué patrón de diseño garantiza que una clase tenga una única instancia y ofrece un punto de acceso global a ella?", r: ["Singleton", "Factory Method", "Observer", "Decorator"], c: 0 },
+      { p: "Según la métrica de McCabe, ¿cuál es la complejidad ciclomática de un método con una única estructura if-else (una sola decisión)?", r: ["2", "1", "3", "4"], c: 0 },
+      { p: "¿Qué principio SOLID exige que las clases hijas puedan sustituir a su clase padre sin alterar el comportamiento correcto del programa?", r: ["Sustitución de Liskov", "Responsabilidad única", "Abierto/cerrado", "Inversión de dependencias"], c: 0 },
+      { llave: true, p: "¿Cómo se llama el ataque que prueba, una tras otra, todas las combinaciones posibles de una contraseña?", r: ["Fuerza bruta", "Phishing", "Inyección SQL", "Desbordamiento de búfer"], c: 0 }
+    ]
+  },
+  {
+    nombre: "El Salón de las Almas Compiladas", emoji: "👻", tema: "👻 Todo mezclado + ⚙️ Gestión de software", tiempo: 70,
+    admin: "Sala 5. Mi obra maestra. Cero documentación, infinitos fantasmas.",
+    preguntas: [
+      { p: "¿Qué gobernante de Valaquia, apodado «el Empalador», inspiró en parte a Drácula?", r: ["Vlad III", "Esteban III de Moldavia", "Matías Corvino", "Mehmed II"], c: 0 },
+      { p: "Según la Ley de Brooks, ¿qué suele ocurrir si se añaden más programadores a un proyecto de software que ya va retrasado?", r: ["Se retrasa aún más", "Se acelera de forma proporcional", "Desaparecen los errores", "Mejora la calidad del código"], c: 0 },
+      { p: "¿Qué ley afirma que el diseño de un sistema acabará reflejando la estructura de comunicación de la organización que lo construye?", r: ["Ley de Conway", "Ley de Brooks", "Ley de Moore", "Ley de Lehman"], c: 0 },
+      { p: "¿Cómo llamó Alan Turing en 1950 a la prueba que hoy lleva su nombre?", r: ["El juego de la imitación", "La prueba de la máquina", "El examen de Church", "La paradoja del espejo"], c: 0 },
+      { llave: true, p: "¿Qué mecanismo de autenticación exige dos pruebas independientes, como una contraseña y un código enviado al celular?", r: ["Autenticación de doble factor (2FA)", "Cifrado de extremo a extremo", "Firma digital", "Certificado SSL"], c: 0 }
+    ]
+  }
+];
+
+const JEFE = {
+  nombre: "La Puerta del Infierno", emoji: "👹", tema: "🔥 Todas las artes oscuras", tiempo: 100,
+  admin: "",
+  preguntas: [
+    { p: "En el «Infierno» de Dante, ¿qué pecado se castiga en el noveno y último círculo?", r: ["La traición", "La avaricia", "La ira", "La lujuria"], c: 0 },
+    { p: "¿Qué grave vulnerabilidad de 2014 en OpenSSL permitía leer la memoria de los servidores?", r: ["Heartbleed", "Shellshock", "POODLE", "Spectre"], c: 0 },
+    { p: "¿Por qué se perdió la sonda Mars Climate Orbiter en 1999?", r: ["Un equipo usó unidades imperiales y otro métricas", "Un desbordamiento de entero en el ordenador de a bordo", "Un fallo del compilador", "Una tormenta solar"], c: 0 },
+    { p: "¿Quién acuñó la metáfora de la «deuda técnica» en 1992?", r: ["Ward Cunningham", "Kent Beck", "Martin Fowler", "Grady Booch"], c: 0 },
+    { p: "¿Cómo se llama el fallo en el que el resultado depende del orden impredecible en que se ejecutan varios hilos o procesos?", r: ["Condición de carrera", "Interbloqueo (deadlock)", "Fuga de memoria", "Inanición"], c: 0 },
+    { p: "¿Qué modelo de estimación de costos de software creó Barry Boehm en 1981?", r: ["COCOMO", "Puntos de caso de uso", "PERT", "Planning Poker"], c: 0 },
+    { p: "En la leyenda irlandesa, ¿quién engañó al diablo y dio origen a la calabaza tallada de Halloween?", r: ["Jack el Tacaño", "Will el Pelirrojo", "Tom el Sombrío", "Paddy el Cojo"], c: 0 },
+    { p: "¿Qué algoritmo calcula el gradiente del error capa por capa, de la salida hacia la entrada, en una red neuronal?", r: ["Retropropagación", "Dropout", "Normalización por lotes", "Convolución"], c: 0 }
+  ]
+};
+
+// Preguntas extra que se añaden a la puerta final según la corrupción
+const JEFE_EXTRA = [
+  { p: "¿Qué perro de tres cabezas guarda las puertas del inframundo en la mitología griega?", r: ["Cerbero", "Fénrir", "Anubis", "Garm"], c: 0 },
+  { p: "¿Qué poeta inglés escribió «El paraíso perdido» en 1667?", r: ["John Milton", "William Blake", "John Donne", "Lord Byron"], c: 0 },
+  { p: "En UML, ¿qué diagrama modela los estados por los que pasa un objeto y las transiciones entre ellos?", r: ["Diagrama de estados", "Diagrama de despliegue", "Diagrama de paquetes", "Diagrama de objetos"], c: 0 },
+  { p: "¿Qué técnica de pruebas introduce errores deliberados en el código para comprobar si las pruebas los detectan?", r: ["Pruebas de mutación", "Fuzzing", "Pruebas de humo", "Pruebas A/B"], c: 0 }
+];
+
+const FASES_JEFE = [
+  { emoji: "👹", nombre: "El Guardián del Umbral" },
+  { emoji: "😈", nombre: "El Señor de las Cenizas" },
+  { emoji: "👿", nombre: "El Administrador Caído" }
+];
+
+/* ---------- Voz del Administrador ---------- */
+const ADMIN = {
+  inicio: [
+    "Bienvenido. Yo escribí esta mazmorra… y dejé bugs a propósito. Que empiece el despliegue.",
+    "Soy el Administrador. Tengo acceso root a tu destino. Entra… si te atreves."
+  ],
+  acierto: ["Test aprobado. Por ahora.", "Respuesta válida. Compilando tu esperanza…", "Sin errores… todavía.", "Vaya, alguien leyó la documentación."],
+  error: [
+    "Excepción no controlada. Tu vida fue liberada de la memoria.",
+    "Assertion failed: el error eres tú.",
+    "Error 500: fallo interno del jugador.",
+    "Ese commit rompió producción. Y a ti."
+  ],
+  bomba: [
+    "Timeout. La bomba provocó un kernel panic.",
+    "Se acabó el tiempo. Haré rollback… de tu vida.",
+    "BOOM. Ese fue tu último deploy en esta sala."
+  ],
+  etapa: [
+    null,
+    "Detecto corrupción en los archivos de la sala… Algo se está pudriendo.",
+    "La mazmorra ya es inestable. Los datos se pudren y las paredes sangran.",
+    "SISTEMA CONDENADO. La puerta final ahora me obedece a mí, no a ti."
+  ],
+  fragmento: [
+    "Fragmento de llave descifrado. No hay backup: si lo pierdes, lo pierdes.",
+    "Guarda este dígito. El código no está en ningún repositorio."
+  ],
+  llaveCompleta: "Llave completa. Anótala: en la puerta, el sistema ocultará el código.",
+  comodin: ["Un pacto con la oscuridad… siempre cobra intereses.", "Trampa registrada. La corrupción te lo agradece."],
+  revelar: ["Pedir ayuda cuesta caro. Mi base de datos te cobró una vida.", "Código mostrado. Tu alma quedó como garantía."],
+  puerta: ["Ingresa el código… o arde. Tienes poco tiempo.", "La puerta no tiene botón de cancelar. Teclea el código."],
+  codigoMal: [
+    "Acceso denegado. Intento registrado en el log.",
+    "Contraseña incorrecta. La puerta se corrompe un poco más.",
+    "401 Unauthorized. 403 Forbidden. 666 Infernal."
+  ],
+  puertaAbre: ["Acceso concedido… Que Dios te ayude, porque yo no.", "Puerta abierta. Bienvenido a producción… del infierno."],
+  jefe: [
+    "Detrás de la puerta no hay un jefe… hay un deploy del infierno. Cada pregunta rompe un sello.",
+    "Aquí no valen los pactos ni los comodines. Solo tú y el fuego."
+  ],
+  fases: [
+    "Primer sello roto. Algo se mueve detrás de las llamas…",
+    "Segundo sello roto. Huele a azufre en el servidor."
+  ],
+  victoria: ["Imposible… voy a tener que escribir un parche.", "Ganaste. Revisaré mis logs… y mis bugs."],
+  gameOver: ["Conexión terminada. Tu alma quedó guardada en el log.", "Game over. Rollback a tu vida anterior: fallido."]
+};
+const azar = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+const NOMBRES_ETAPA = ["Estable", "Inestable", "Corrupta", "Condenada"];
+function etapaDe(c) { return c >= 60 ? 3 : c >= 40 ? 2 : c >= 20 ? 1 : 0; }
+
+/* =====================================================================
+   ESTADO
+   ===================================================================== */
+const estado = {
+  vidas: VIDAS_INICIALES,
+  nivel: 0,            // índice de la sala actual (0 a 4)
+  explosiones: 0,      // bombas que explotaron
+  errores: 0,          // respuestas incorrectas
+  corrupcion: 0,       // 0 a 100
+  codigo: "",          // código secreto de la llave
+  fragmentos: 0,       // dígitos ya descifrados
+  tieneLlave: false,
+  enJefe: false,
+  ocultarCodigo: false
+};
+
+const $pantalla = document.getElementById("pantalla");
+const $hud = document.getElementById("hud");
+let temporizador = null;
+let sonidoActivo = true;
+let vidasMostradas = VIDAS_INICIALES;   // para animar la calabaza que se rompe
+
+/* ---------- Registro guardado en el navegador ---------- */
+const CLAVE_REGISTRO = "mazmorra_maldita_registro";
+function cargarRegistro() {
+  try { return JSON.parse(localStorage.getItem(CLAVE_REGISTRO)) || {}; } catch (e) { return {}; }
+}
+function guardarRegistro(r) {
+  try { localStorage.setItem(CLAVE_REGISTRO, JSON.stringify(r)); } catch (e) { /* sin almacenamiento */ }
+}
+
+/* =====================================================================
+   CONSOLA Y VOZ DEL ADMINISTRADOR
+   ===================================================================== */
+const $consola = document.getElementById("consola");
+const $consolaLineas = document.getElementById("consola-lineas");
+const $consolaUltima = document.getElementById("consola-ultima");
+document.getElementById("consola-cab").addEventListener("click", () => {
+  $consola.classList.toggle("cerrada");
+  document.getElementById("consola-flecha").textContent = $consola.classList.contains("cerrada") ? "▲" : "▼";
+  $consolaLineas.scrollTop = $consolaLineas.scrollHeight;
+});
+
+function log(nivel, texto) {
+  const hora = new Date().toLocaleTimeString("es-CO", { hour12: false });
+  const linea = document.createElement("div");
+  linea.className = "l-" + nivel;
+  linea.textContent = `[${hora}] [${nivel}] ${texto}`;
+  $consolaLineas.appendChild(linea);
+  while ($consolaLineas.children.length > 60) $consolaLineas.removeChild($consolaLineas.firstChild);
+  $consolaLineas.scrollTop = $consolaLineas.scrollHeight;
+  $consolaUltima.textContent = `[${nivel}] ${texto}`;
+  $consolaUltima.className = "l-" + nivel;
+}
+
+let burbujaTimer = null, tipearTimer = null;
+function decir(texto, ms = 4800) {
+  if (!texto) return;
+  log("ADMIN", texto);
+  const b = document.getElementById("admin-burbuja");
+  b.innerHTML = '<span class="admin-nombre">😈 ADMIN</span><span id="admin-texto"></span>';
+  b.classList.add("visible");
+  const t = document.getElementById("admin-texto");
+  let i = 0;
+  clearInterval(tipearTimer); clearTimeout(burbujaTimer);
+  tipearTimer = setInterval(() => {
+    t.textContent = texto.slice(0, ++i);
+    if (i >= texto.length) clearInterval(tipearTimer);
+  }, 22);
+  burbujaTimer = setTimeout(() => b.classList.remove("visible"), ms + texto.length * 22);
+}
+
+/* =====================================================================
+   AMBIENTE DE TERROR
+   ===================================================================== */
+function crearAmbiente() {
+  const amb = document.getElementById("ambiente");
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  for (let i = 0; i < 14; i++) {
+    const g = document.createElement("div");
+    g.className = "gota";
+    g.style.left = rnd(2, 98) + "vw";
+    g.style.animationDuration = rnd(5, 11) + "s";
+    g.style.animationDelay = rnd(0, 10) + "s";
+    amb.appendChild(g);
+  }
+  for (let i = 0; i < 7; i++) {
+    const o = document.createElement("div");
+    o.className = "ojos";
+    o.innerHTML = "<i></i><i></i>";
+    o.style.left = rnd(3, 92) + "vw";
+    o.style.top = rnd(8, 88) + "vh";
+    o.style.animationDelay = rnd(0, 8) + "s";
+    o.style.animationDuration = rnd(6, 11) + "s";
+    amb.appendChild(o);
+  }
+  for (let i = 0; i < 4; i++) {
+    const m = document.createElement("div");
+    m.className = "murcielago";
+    m.textContent = "🦇";
+    m.style.top = rnd(4, 60) + "vh";
+    m.style.animationDuration = rnd(11, 20) + "s";
+    m.style.animationDelay = rnd(0, 14) + "s";
+    amb.appendChild(m);
+  }
+  const inf = document.getElementById("infierno");
+  for (let i = 0; i < 16; i++) {
+    const l = document.createElement("span");
+    l.className = "llama";
+    l.textContent = "🔥";
+    l.style.animationDelay = rnd(0, 0.7) + "s";
+    l.style.fontSize = rnd(40, 70) + "px";
+    inf.appendChild(l);
+  }
+}
+
+/* =====================================================================
+   EFECTOS ESPECIALES
+   ===================================================================== */
+function activar(id, ms) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove("activo"); void el.offsetWidth; el.classList.add("activo");
+  setTimeout(() => el.classList.remove("activo"), ms);
+}
+
+function centroDe(el) {
+  const r = el.getBoundingClientRect();
+  return [r.left + r.width / 2, r.top + r.height / 2];
+}
+
+function sacudirPantalla() {
+  document.body.classList.add("sacudir");
+  setTimeout(() => document.body.classList.remove("sacudir"), 600);
+}
+
+function particulas(x, y, emojis, cantidad = 14, distancia = 150) {
+  for (let i = 0; i < cantidad; i++) {
+    const p = document.createElement("span");
+    p.className = "particula";
+    p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    const ang = Math.random() * Math.PI * 2;
+    const dist = distancia * (0.4 + Math.random() * 0.8);
+    p.style.left = x + "px";
+    p.style.top = y + "px";
+    p.style.setProperty("--dx", Math.cos(ang) * dist + "px");
+    p.style.setProperty("--dy", Math.sin(ang) * dist + "px");
+    p.style.setProperty("--rot", (Math.random() * 720 - 360) + "deg");
+    p.style.fontSize = (16 + Math.random() * 20) + "px";
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1100);
+  }
+}
+
+function efectoAcierto(boton, esJefe) {
+  const [x, y] = centroDe(boton);
+  particulas(x, y, ["✨", "⭐", "💚", "🕯️"], 14, 140);
+  if (esJefe) {
+    const je = document.getElementById("jefe-emoji");
+    if (je) {
+      const [jx, jy] = centroDe(je);
+      particulas(jx, jy, ["🩸", "💥", "⚡", "🔥"], 20, 170);
+    }
+    activar("rayo", 700);
+    sacudirPantalla();
+  }
+}
+
+function efectoDano(origen) {
+  const [x, y] = centroDe(origen);
+  particulas(x, y, ["💀", "🩸", "🔥", "🦇"], 18, 190);
+  const v = document.getElementById("vidas");
+  if (v) {
+    const [vx, vy] = centroDe(v);
+    particulas(vx, vy, ["💔", "🩸"], 8, 90);
+    const m = document.createElement("span");
+    m.className = "menos-uno";
+    m.textContent = `−${VIDAS_POR_ERROR} 🎃`;
+    v.appendChild(m);
+    setTimeout(() => m.remove(), 1200);
+  }
+  activar("dano", 950);
+  activar("susto", 650);
+  sacudirPantalla();
+  sonidoGrito();
+}
+
+function lluviaFestiva() {
+  let n = 0;
+  const id = setInterval(() => {
+    particulas(Math.random() * innerWidth, Math.random() * innerHeight * 0.6,
+      ["🎃", "👻", "🦇", "✨", "🧩", "🕯️"], 10, 220);
+    if (++n >= 14) clearInterval(id);
+  }, 300);
+}
+
+/* ---------- Glitch (la mazmorra se descompone) ---------- */
+function glitchearTexto() {
+  const objetivos = document.querySelectorAll(".pregunta, .tarjeta h1, .encabezado-nivel");
+  if (!objetivos.length) return;
+  const el = objetivos[Math.floor(Math.random() * objetivos.length)];
+  const original = el.textContent;
+  const simbolos = "█▓▒░#@$%&!?<>/\\01";
+  const roto = original.split("").map(ch =>
+    (ch !== " " && Math.random() < 0.3) ? simbolos[Math.floor(Math.random() * simbolos.length)] : ch
+  ).join("");
+  el.textContent = roto;
+  setTimeout(() => { if (document.body.contains(el)) el.textContent = original; }, 200);
+}
+
+function glitchRafaga(conSonido) {
+  document.body.classList.remove("glitch"); void document.body.offsetWidth;
+  document.body.classList.add("glitch");
+  setTimeout(() => document.body.classList.remove("glitch"), 320);
+  glitchearTexto();
+  if (conSonido) sonidoCorrupcion();
+}
+
+function programarGlitch() {
+  const c = estado.corrupcion;
+  const espera = c < 10 ? 4000 : Math.max(1500, 11000 - c * 120);
+  setTimeout(() => {
+    if (estado.corrupcion >= 10 && Math.random() < 0.4 + estado.corrupcion / 200) glitchRafaga(false);
+    programarGlitch();
+  }, espera + Math.random() * 2500);
+}
+
+function iniciarEfectosGlobales() {
+  const lin = document.getElementById("linterna");
+  window.addEventListener("mousemove", (e) => {
+    lin.style.setProperty("--lx", e.clientX + "px");
+    lin.style.setProperty("--ly", e.clientY + "px");
+  });
+  const programarRayos = () => {
+    setTimeout(() => {
+      activar("rayo", 700);
+      setTimeout(sonidoTrueno, 450);
+      programarRayos();
+    }, 9000 + Math.random() * 12000);
+  };
+  programarRayos();
+  programarGlitch();
+}
+
+/* =====================================================================
+   CORRUPCIÓN
+   ===================================================================== */
+function aplicarCorrupcion() {
+  const c = estado.corrupcion;
+  document.body.style.setProperty("--corr", (c / 100).toFixed(2));
+  document.body.dataset.etapa = etapaDe(c);
+  document.getElementById("corr-fill").style.width = c + "%";
+  document.getElementById("corr-txt").textContent = c + "%";
+  document.getElementById("corr-etapa").textContent = NOMBRES_ETAPA[etapaDe(c)];
+}
+
+function corromper(cantidad, motivo) {
+  const antes = etapaDe(estado.corrupcion);
+  estado.corrupcion = Math.min(100, estado.corrupcion + cantidad);
+  log("WARN", `☣ corrupción +${cantidad}% (${motivo}) → ${estado.corrupcion}%`);
+  aplicarCorrupcion();
+  glitchRafaga(true);
+  const despues = etapaDe(estado.corrupcion);
+  if (despues > antes) {
+    decir(ADMIN.etapa[despues], 6000);
+    sacudirPantalla();
+    activar("rayo", 700);
+  }
+}
+
+/* =====================================================================
+   UTILIDADES
+   ===================================================================== */
+function mezclar(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function mostrar(html, clase = "") {
+  $pantalla.innerHTML = html;
+  $pantalla.className = clase;
+  window.scrollTo({ top: 0 });
+}
+
+function pararTemporizador() {
+  if (temporizador) { clearInterval(temporizador); temporizador = null; }
+  document.body.classList.remove("alerta");
+}
+
+function formatear(seg) {
+  return Math.max(0, Math.ceil(seg));
+}
+
+function limpiarClasesEscena() {
+  document.body.classList.remove("jefe", "puerta", "alerta");
+}
+
+/* ---------- Sonido (generado con Web Audio, sin archivos) ---------- */
+let audioCtx = null;
+function tono(freq, dur = 0.12, tipo = "square", vol = 0.06, retraso = 0) {
+  if (!sonidoActivo) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = tipo; o.frequency.value = freq;
+    const t0 = audioCtx.currentTime + retraso;
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t0); o.stop(t0 + dur);
+  } catch (e) { /* sin audio, no pasa nada */ }
+}
+function barrido(f1, f2, dur = 0.5, tipo = "sawtooth", vol = 0.12) {
+  if (!sonidoActivo) return;
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = tipo;
+    const t0 = audioCtx.currentTime;
+    o.frequency.setValueAtTime(f1, t0);
+    o.frequency.exponentialRampToValueAtTime(f2, t0 + dur);
+    g.gain.setValueAtTime(vol, t0);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t0); o.stop(t0 + dur);
+  } catch (e) { /* sin audio */ }
+}
+const sonidoBien = () => { tono(392, .12, "triangle", .1); tono(587, .18, "triangle", .1, .1); };
+const sonidoMal = () => { tono(90, .35, "sawtooth", .12); tono(85, .35, "square", .06, .05); };
+const sonidoTic = () => { tono(62, .16, "sine", .3); tono(55, .2, "sine", .26, .17); };
+const sonidoTecla = () => tono(520, .05, "square", .05);
+const sonidoGrito = () => { barrido(1400, 300, .55, "sawtooth", .1); barrido(1750, 420, .55, "square", .05); };
+const sonidoTrueno = () => { barrido(120, 35, 1.4, "sawtooth", .2); };
+const sonidoPuerta = () => { barrido(70, 28, 1.6, "sawtooth", .22); barrido(320, 90, 1.2, "square", .07); };
+const sonidoCorrupcion = () => { for (let i = 0; i < 6; i++) tono(180 + Math.random() * 1300, .05, "square", .05, i * .04); };
+const sonidoExplosion = () => {
+  for (let i = 0; i < 16; i++) tono(150 - i * 7, .25, "sawtooth", .12, i * 0.04);
+  tono(45, 1, "sine", .35);
+};
+const sonidoVictoria = () => {
+  [440, 523, 659, 880, 659, 880].forEach((f, i) => tono(f, .24, "triangle", .12, i * .16));
+};
+
+document.getElementById("btn-sonido").addEventListener("click", (e) => {
+  sonidoActivo = !sonidoActivo;
+  e.currentTarget.textContent = sonidoActivo ? "🔊" : "🔇";
+});
+
+/* =====================================================================
+   HUD  (salas, llave, jefe, vidas, corrupción y código)
+   ===================================================================== */
+function actualizarHUD() {
+  $hud.hidden = false;
+  let html = "";
+  for (let i = 0; i < NIVELES.length; i++) {
+    const hecho = estado.enJefe || i < estado.fragmentos;
+    let clase = "punto";
+    if (!estado.enJefe && !hecho && i === estado.nivel) clase += " actual";
+    else if (hecho) clase += " hecho";
+    html += `<div class="${clase}" title="Sala ${i + 1}">${hecho ? "✓" : i + 1}</div>`;
+  }
+  html += `<div class="punto llave ${estado.tieneLlave ? "tiene" : ""}" title="Llave del jefe">${estado.tieneLlave ? "🗝️" : "🔒"}</div>`;
+  html += `<div class="punto jefe-punto ${estado.enJefe ? "actual" : ""}" title="Puerta del Infierno">👹</div>`;
+  document.getElementById("progreso").innerHTML = html;
+
+  let vidas = "";
+  for (let i = 0; i < VIDAS_INICIALES; i++) {
+    const viva = i < estado.vidas;
+    const recien = !viva && i < vidasMostradas;   // la que acaba de perderse
+    vidas += `<span class="vida ${recien ? "recien" : ""}">${viva ? "🎃" : "💀"}</span>`;
+  }
+  document.getElementById("vidas").innerHTML = vidas;
+  vidasMostradas = estado.vidas;
+
+  let slots = '<span class="codigo-etiqueta">🗝️ Código</span>';
+  for (let i = 0; i < LARGO_CODIGO; i++) {
+    const tiene = i < estado.fragmentos;
+    const txt = tiene ? (estado.ocultarCodigo ? "▓" : estado.codigo[i]) : "·";
+    slots += `<span class="slot ${tiene ? "lleno" : ""}">${txt}</span>`;
+  }
+  document.getElementById("codigo-hud").innerHTML = slots;
+}
+
+/* =====================================================================
+   PANTALLAS
+   ===================================================================== */
+function pantallaInicio() {
+  pararTemporizador();
+  limpiarClasesEscena();
+  estado.enJefe = false;
+  $hud.hidden = true;
+  const reg = cargarRegistro();
+  const hayRegistro = reg.intentos || reg.victorias;
+  const registro = hayRegistro ? `
+    <div class="datos">
+      <div class="dato">🎮 Partidas: ${reg.intentos || 0}</div>
+      <div class="dato">🏆 Victorias: ${reg.victorias || 0}</div>
+      ${reg.mejorCorrupcion != null ? `<div class="dato">☣️ Mejor corrupción: ${reg.mejorCorrupcion}%</div>` : ""}
+    </div>` : "";
+  mostrar(`
+    <section class="tarjeta">
+      <div class="grande">💣</div>
+      <h1>La Mazmorra Maldita</h1>
+      <div class="admin-cita">[ADMIN@mazmorra ~]$ Yo construí este lugar. Cada sala, cada pregunta, cada bug.</div>
+      <p>Cruza 5 salas que mezclan <b>Halloween</b>, <b>historia</b>, <b>inteligencia artificial</b> y <b>análisis de software</b> antes de que la bomba explote.</p>
+      <ul class="reglas">
+        <li>⏳ Cada sala tiene un <b>límite de tiempo</b>. Cada vez es más difícil.</li>
+        <li>🎃 Tienes <b>${VIDAS_INICIALES} vidas</b>. Cada <b>respuesta incorrecta</b> te quita ${VIDAS_POR_ERROR}.</li>
+        <li>💣 Si se acaba el tiempo, la bomba explota: pierdes <b>otra vida</b> y la <b>sala se reinicia</b> desde la primera pregunta.</li>
+        <li>☣️ Cada error y cada bomba <b>corrompen la mazmorra</b>: glitches, grietas y fuego. La corrupción <b>nunca baja</b>.</li>
+        <li>🗝️ La última pregunta de cada sala es la <b>Pregunta de la Llave</b>: revela un dígito del <b>código secreto</b> (${LARGO_CODIGO} dígitos en total).</li>
+        <li>🚪 Con el código abres la <b>Puerta del Infierno</b>: debes teclearlo a tiempo y de memoria. Cuanto más corrupta esté la mazmorra, <b>más difícil será al otro lado</b> (más preguntas y menos tiempo).</li>
+        <li>🔦 Comodines en las salas: <b>50/50</b> y <b>+${SEGUNDOS_EXTRA_COMODIN} s</b>. Son pactos con la oscuridad: <b>corrompen</b>.</li>
+        <li>🏆 Derrota a la puerta y gana el trofeo con las <b>2 piezas del rompecabezas</b>.</li>
+      </ul>
+      ${registro}
+      <button class="btn" id="btn-empezar">☠️ Entrar a la mazmorra</button>
+    </section>
+  `);
+  document.getElementById("btn-empezar").onclick = () => {
+    reiniciarEstado();
+    pantallaIntro(NIVELES[0], false);
+  };
+  decir(azar(ADMIN.inicio));
+}
+
+function reiniciarEstado() {
+  estado.vidas = VIDAS_INICIALES;
+  estado.nivel = 0;
+  estado.explosiones = 0;
+  estado.errores = 0;
+  estado.corrupcion = 0;
+  estado.fragmentos = 0;
+  estado.tieneLlave = false;
+  estado.enJefe = false;
+  estado.ocultarCodigo = false;
+  estado.codigo = Array.from({ length: LARGO_CODIGO }, () => Math.floor(Math.random() * 10)).join("");
+  vidasMostradas = VIDAS_INICIALES;
+  aplicarCorrupcion();
+  const reg = cargarRegistro();
+  reg.intentos = (reg.intentos || 0) + 1;
+  guardarRegistro(reg);
+  log("INFO", "nueva partida · código secreto generado (cifrado)");
+}
+
+/* La puerta final se endurece según la corrupción */
+function prepararJefe() {
+  const c = estado.corrupcion;
+  const extras = Math.min(JEFE_EXTRA.length, Math.floor(c / CORRUPCION_POR_PREGUNTA_EXTRA));
+  const menos = Math.round(c * SEGUNDOS_MENOS_POR_PUNTO);
+  const tiempo = Math.max(TIEMPO_MINIMO_JEFE, JEFE.tiempo - menos);
+  return { ...JEFE, tiempo, extras, menos: JEFE.tiempo - tiempo, preguntas: JEFE.preguntas.concat(JEFE_EXTRA.slice(0, extras)) };
+}
+
+function textoNotaJefe(def) {
+  const pregs = def.extras > 0 ? `<b>+${def.extras} pregunta${def.extras > 1 ? "s" : ""}</b>` : "sin preguntas extra";
+  const tiempo = def.menos > 0 ? `<b>−${def.menos} s</b> de tiempo` : "sin recorte de tiempo";
+  return `☣️ Corrupción ${estado.corrupcion}% (${NOMBRES_ETAPA[etapaDe(estado.corrupcion)]}): ${pregs} y ${tiempo}.`;
+}
+
+function pantallaIntro(def, esJefe) {
+  pararTemporizador();
+  estado.enJefe = esJefe;
+  estado.ocultarCodigo = false;
+  document.body.classList.toggle("jefe", esJefe);
+  document.body.classList.remove("puerta");
+  actualizarHUD();
+  const titulo = esJefe ? "🔥 EL OTRO LADO DE LA PUERTA 🔥" : `Sala ${estado.nivel + 1} de ${NIVELES.length}`;
+  const aviso = esJefe
+    ? "Los sellos de la puerta se rompen uno a uno con cada respuesta correcta. Aquí no valen pactos ni comodines. ¡Derrótala antes de que explote la bomba!"
+    : "Algo se mueve en la oscuridad. Responde todas las preguntas antes de que se acabe el tiempo. La última es la Pregunta de la Llave.";
+  mostrar(`
+    <section class="tarjeta">
+      <div class="grande">${def.emoji}</div>
+      <h2>${titulo}</h2>
+      <h1 style="font-size:clamp(30px,6vw,46px)">${def.nombre}</h1>
+      <p>${aviso}</p>
+      ${esJefe ? `<div class="nota-corr">${textoNotaJefe(def)}</div>` : ""}
+      <div class="datos">
+        <div class="dato">${def.tema}</div>
+        <div class="dato">❓ ${def.preguntas.length} preguntas</div>
+        <div class="dato">⏳ ${def.tiempo} segundos</div>
+        <div class="dato">${"🎃".repeat(estado.vidas)} ${estado.vidas} ${estado.vidas === 1 ? "vida" : "vidas"}</div>
+      </div>
+      <button class="btn" id="btn-go">💣 ¡Empezar!</button>
+    </section>
+  `);
+  document.getElementById("btn-go").onclick = () => jugar(def, esJefe);
+  decir(esJefe ? azar(ADMIN.jefe) : def.admin);
+}
+
+/* ---------- Pantalla de juego ---------- */
+function jugar(def, esJefe) {
+  pararTemporizador();
+  const normales = def.preguntas.filter(q => !q.llave);
+  const preguntaLlave = def.preguntas.find(q => q.llave);
+  const preguntas = mezclar(normales);
+  if (preguntaLlave) preguntas.push(preguntaLlave);     // la Pregunta de la Llave va al final
+  const total = preguntas.length;
+  let duracion = def.tiempo * 1000;
+  let fin = Date.now() + duracion;
+  let indice = 0;
+  let bloqueado = false;
+  let ultimoSegundo = null;
+  let usado50 = false, usadoTiempo = false;
+  let actual = [];
+  let fase = 0;
+
+  mostrar(`
+    <section class="juego">
+      <div class="encabezado-nivel">${esJefe ? "🔥 " + def.nombre : "Sala " + (estado.nivel + 1) + " · " + def.nombre}</div>
+      <div class="tema-nivel">${def.tema}</div>
+      ${esJefe ? `<div class="jefe-info"><span class="jefe-emoji" id="jefe-emoji">${FASES_JEFE[0].emoji}</span><div class="jefe-nombre" id="jefe-nombre">${FASES_JEFE[0].nombre}</div><div class="vida-jefe"><div id="hp-jefe"></div></div></div>` : ""}
+      <div class="zona-bomba">
+        <svg id="bomba" viewBox="0 0 200 200">
+          <circle cx="95" cy="128" r="62" fill="#131010" stroke="#4a3a3a" stroke-width="4"/>
+          <ellipse cx="72" cy="100" rx="14" ry="8" fill="rgba(255,255,255,.14)" transform="rotate(-30 72 100)"/>
+          <rect x="78" y="55" width="34" height="20" rx="4" fill="#3a3030"/>
+          <path class="ojo-b" d="M60 110 L90 124 L84 136 L60 126 Z"/>
+          <path class="ojo-b" d="M130 110 L100 124 L106 136 L130 126 Z"/>
+          <path d="M62 152 L72 163 L82 150 L92 163 L102 150 L112 163 L122 150 L132 160" fill="none" stroke="#cfc3ac" stroke-width="3" stroke-linejoin="round"/>
+          <path id="mecha" d="M95 55 C95 28, 128 36, 144 14" fill="none" stroke="#b08a52" stroke-width="5" stroke-linecap="round"/>
+          <g id="chispa">
+            <circle r="11" fill="#ff7a00"/>
+            <circle r="5" fill="#fff3b0"/>
+          </g>
+        </svg>
+        <div class="reloj">
+          <div id="tiempo">${def.tiempo}</div>
+          <div class="barra"><div id="barra-tiempo"></div></div>
+        </div>
+      </div>
+      <div class="caja-pregunta" id="caja"></div>
+      ${esJefe
+        ? `<div class="sin-pactos">🚫 Los pactos no valen en la puerta del infierno.</div>`
+        : `<div class="comodines">
+             <button class="btn-mini" id="btn-5050">🔦 50/50 <small>(+${CORRUPCION_5050}% ☣️)</small></button>
+             <button class="btn-mini" id="btn-mas-tiempo">⏳ +${SEGUNDOS_EXTRA_COMODIN} s <small>(+${CORRUPCION_TIEMPO}% ☣️)</small></button>
+           </div>`}
+    </section>
+  `);
+
+  const $tiempo = document.getElementById("tiempo");
+  const $barra = document.getElementById("barra-tiempo");
+  const $bomba = document.getElementById("bomba");
+  const $mecha = document.getElementById("mecha");
+  const $chispa = document.getElementById("chispa");
+  const $caja = document.getElementById("caja");
+  const largoMecha = $mecha.getTotalLength();
+
+  function dibujarMecha(fraccion) {
+    const f = Math.min(1, Math.max(0, fraccion));
+    $mecha.style.strokeDasharray = `${largoMecha * f} ${largoMecha}`;
+    const p = $mecha.getPointAtLength(largoMecha * f);
+    $chispa.setAttribute("transform", `translate(${p.x} ${p.y})`);
+  }
+
+  function mostrarPregunta() {
+    const q = preguntas[indice];
+    const esLlave = !!q.llave;
+    const opciones = mezclar(q.r.map((texto, k) => ({ texto, ok: k === q.c })));
+    $caja.classList.toggle("llave", esLlave);
+    $caja.innerHTML = `
+      ${esLlave ? `<div class="insignia-llave">🗝️ PREGUNTA DE LA LLAVE · dígito ${estado.nivel + 1} de ${NIVELES.length}</div>` : ""}
+      <div class="pregunta-num">Pregunta ${indice + 1} de ${total}</div>
+      <h2 class="pregunta">${q.p}</h2>
+      <div class="opciones"></div>
+    `;
+    const cont = $caja.querySelector(".opciones");
+    actual = opciones.map((op, n) => {
+      const b = document.createElement("button");
+      b.className = "opcion";
+      b.style.setProperty("--i", n);
+      b.textContent = `${n + 1}. ${op.texto}`;
+      b.dataset.num = n + 1;
+      b.onclick = () => responder(b, op.ok);
+      cont.appendChild(b);
+      return { boton: b, ok: op.ok };
+    });
+    bloqueado = false;
+  }
+
+  function cambiarFase(n) {
+    const f = FASES_JEFE[n];
+    const je = document.getElementById("jefe-emoji");
+    if (je) je.textContent = f.emoji;
+    const nm = document.getElementById("jefe-nombre");
+    if (nm) nm.textContent = `${f.nombre} · sellos rotos ${n}/3`;
+    decir(ADMIN.fases[n - 1]);
+    log("WARN", `🔥 sello ${n} de 3 roto`);
+    activar("rayo", 700);
+    sacudirPantalla();
+    sonidoTrueno();
+    particulas(innerWidth / 2, innerHeight / 3, ["🔥", "💀", "😈", "🩸"], 30, 300);
+  }
+
+  function responder(boton, correcta) {
+    if (bloqueado) return;
+    if (correcta) {
+      bloqueado = true;
+      boton.classList.add("bien");
+      $caja.querySelectorAll(".opcion").forEach(b => b.disabled = true);
+      sonidoBien();
+      efectoAcierto(boton, esJefe);
+      indice++;
+      log("INFO", `test_pregunta_${indice}: PASSED`);
+      if (Math.random() < 0.25) decir(azar(ADMIN.acierto));
+      if (esJefe) {
+        document.getElementById("hp-jefe").style.width = ((total - indice) / total * 100) + "%";
+        const je = document.getElementById("jefe-emoji");
+        je.classList.remove("golpe"); void je.offsetWidth; je.classList.add("golpe");
+        const nuevaFase = Math.min(2, Math.floor(indice / total * 3));
+        if (indice < total && nuevaFase !== fase) { fase = nuevaFase; cambiarFase(fase); }
+      }
+      if (indice >= total) {
+        pararTemporizador();
+        setTimeout(() => nivelSuperado(def, esJefe), 700);
+      } else {
+        setTimeout(mostrarPregunta, 550);
+      }
+    } else {
+      boton.classList.add("mal");
+      boton.disabled = true;
+      sonidoMal();
+      // Cada respuesta incorrecta quita vida y corrompe la mazmorra
+      estado.vidas = Math.max(0, estado.vidas - VIDAS_POR_ERROR);
+      estado.errores++;
+      actualizarHUD();
+      efectoDano(boton);
+      log("ERROR", `RespuestaIncorrectaException en la pregunta ${indice + 1}`);
+      $bomba.classList.remove("enojada"); void $bomba.offsetWidth; $bomba.classList.add("enojada");
+      setTimeout(() => $bomba.classList.remove("enojada"), 500);
+      if (estado.vidas <= 0) {
+        bloqueado = true;
+        pararTemporizador();
+        $caja.querySelectorAll(".opcion").forEach(b => b.disabled = true);
+        corromper(CORRUPCION_ERROR, "respuesta incorrecta");
+        setTimeout(pantallaGameOver, 1100);
+      } else {
+        decir(azar(ADMIN.error));
+        corromper(CORRUPCION_ERROR, "respuesta incorrecta");
+      }
+    }
+  }
+
+  /* ---------- Comodines (pactos con la oscuridad) ---------- */
+  if (!esJefe) {
+    const btn50 = document.getElementById("btn-5050");
+    const btnTiempo = document.getElementById("btn-mas-tiempo");
+    btn50.onclick = () => {
+      if (usado50 || bloqueado) return;
+      const malas = actual.filter(o => !o.ok && !o.boton.disabled);
+      if (malas.length < 2) { decir("No quedan suficientes opciones que descartar."); return; }
+      usado50 = true; btn50.disabled = true;
+      mezclar(malas).slice(0, 2).forEach(o => { o.boton.disabled = true; o.boton.classList.add("descartada"); });
+      log("INFO", "comodín 50/50 activado");
+      decir(azar(ADMIN.comodin));
+      corromper(CORRUPCION_5050, "pacto: comodín 50/50");
+    };
+    btnTiempo.onclick = () => {
+      if (usadoTiempo || bloqueado) return;
+      usadoTiempo = true; btnTiempo.disabled = true;
+      fin += SEGUNDOS_EXTRA_COMODIN * 1000;
+      duracion += SEGUNDOS_EXTRA_COMODIN * 1000;
+      log("INFO", `comodín +${SEGUNDOS_EXTRA_COMODIN}s activado`);
+      decir(azar(ADMIN.comodin));
+      corromper(CORRUPCION_TIEMPO, "pacto: comodín de tiempo");
+      tick();
+    };
+  }
+
+  function tick() {
+    const restante = fin - Date.now();
+    const fraccion = restante / duracion;
+    $tiempo.textContent = formatear(restante / 1000);
+    $barra.style.width = Math.max(0, fraccion * 100) + "%";
+    dibujarMecha(fraccion);
+    const peligro = restante <= 10000;
+    $tiempo.classList.toggle("rojo", peligro);
+    $barra.classList.toggle("rojo", peligro);
+    $bomba.classList.toggle("peligro", peligro);
+    document.body.classList.toggle("alerta", peligro);
+    if (peligro) {
+      const seg = Math.ceil(restante / 1000);
+      if (seg !== ultimoSegundo && seg > 0) { ultimoSegundo = seg; sonidoTic(); }
+    }
+    if (restante <= 0) {
+      pararTemporizador();
+      bloqueado = true;
+      explotar({ tipo: esJefe ? "jefe" : "sala", def });
+    }
+  }
+
+  // Atajos de teclado 1-4
+  function teclado(e) {
+    if (!document.body.contains($caja)) { document.removeEventListener("keydown", teclado); return; }
+    const b = $caja.querySelector(`.opcion[data-num="${e.key}"]`);
+    if (b && !b.disabled) b.click();
+  }
+  document.addEventListener("keydown", teclado);
+
+  mostrarPregunta();
+  tick();
+  temporizador = setInterval(tick, 100);
+}
+
+/* ---------- Explosión ---------- */
+function explotar(ctx) {
+  estado.vidas = Math.max(0, estado.vidas - 1);
+  estado.explosiones++;
+  actualizarHUD();
+  log("ERROR", "💣 BOOM: la bomba llegó a 0");
+  corromper(CORRUPCION_BOMBA, "bomba explotada");
+  sonidoExplosion();
+
+  const flash = document.getElementById("flash");
+  flash.classList.remove("activo"); void flash.offsetWidth; flash.classList.add("activo");
+  document.body.classList.add("sacudir");
+  setTimeout(() => { flash.classList.remove("activo"); document.body.classList.remove("sacudir"); }, 1400);
+
+  setTimeout(() => {
+    if (estado.vidas <= 0) pantallaGameOver();
+    else pantallaExplosion(ctx);
+  }, 1300);
+}
+
+function pantallaExplosion(ctx) {
+  const n = estado.nivel + 1;
+  const clase = ctx.tipo === "sala" ? `Sala${n}` : ctx.tipo === "jefe" ? "PuertaDelInfierno" : "CerraduraFinal";
+  const linea = 40 + Math.floor(Math.random() * 400);
+  const traza =
+    `Exception in thread "mazmorra-main" java.lang.TimeoutException: la bomba llegó a 0\n` +
+    `    at ${clase}.responder(${clase}.java:${linea})\n` +
+    `    at Jugador.pensarDemasiado(Jugador.java:666)\n` +
+    `    at Bomba.explotar(Bomba.java:0)\n` +
+    `    ... bombas explotadas: ${estado.explosiones} · corrupción: ${estado.corrupcion}%`;
+  const accion = ctx.tipo === "sala"
+    ? "La sala se <b>reinicia desde la primera pregunta</b>."
+    : ctx.tipo === "jefe"
+      ? "La puerta se vuelve a sellar y el infierno te espera con <b>más rabia</b>: la corrupción subió."
+      : "La cerradura se reinicia: tendrás que <b>volver a teclear el código</b>.";
+  const boton = ctx.tipo === "sala" ? "🔁 Reiniciar la sala" : ctx.tipo === "jefe" ? "🔁 Volver a la puerta" : "🔁 Reintentar la cerradura";
+  mostrar(`
+    <section class="tarjeta">
+      <div class="grande">💥</div>
+      <h1>¡BOOOM!</h1>
+      <p>Se acabó el tiempo, la bomba explotó y la mazmorra te arrebató una vida…</p>
+      <pre class="traza">${traza}</pre>
+      <p style="font-size:34px">${"🎃".repeat(estado.vidas)}${"💀".repeat(VIDAS_INICIALES - estado.vidas)}</p>
+      <p>${estado.vidas === 1 ? "Solo te queda <b>1 vida</b>" : "Te quedan <b>" + estado.vidas + " vidas</b>"}. ${accion}</p>
+      <button class="btn" id="btn-reintentar">${boton}</button>
+    </section>
+  `);
+  document.getElementById("btn-reintentar").onclick = () => {
+    if (ctx.tipo === "sala") pantallaIntro(ctx.def, false);
+    else if (ctx.tipo === "jefe") pantallaIntro(prepararJefe(), true);
+    else pantallaPuerta();
+  };
+  decir(azar(ADMIN.bomba));
+}
+
+/* ---------- Avance ---------- */
+function nivelSuperado(def, esJefe) {
+  if (esJefe) return pantallaVictoria();
+
+  estado.fragmentos = estado.nivel + 1;
+  actualizarHUD();
+  const digito = estado.codigo[estado.nivel];
+  const eraUltimo = estado.nivel === NIVELES.length - 1;
+  sonidoVictoria();
+  particulas(innerWidth / 2, innerHeight / 2, ["✨", "⭐", "🎃", "🦇"], 26, 280);
+  log("INFO", `fragmento ${estado.fragmentos}/${LARGO_CODIGO} de la llave descifrado`);
+  if (eraUltimo) return pantallaFinNiveles();
+
+  const progreso = estado.codigo.split("").map((d, i) =>
+    `<div class="slot-g ${i < estado.fragmentos ? "" : "vacio"}">${i < estado.fragmentos ? d : "?"}</div>`).join("");
+  mostrar(`
+    <section class="tarjeta">
+      <div class="grande">✅</div>
+      <h1>¡Sala ${estado.nivel + 1} superada!</h1>
+      <p>El Administrador te entrega un fragmento de la llave:</p>
+      <div class="fragmento">🗝️ <span>${digito}</span></div>
+      <div class="codigo-grande">${progreso}</div>
+      <p><b>Anótalo.</b> En la puerta final, el código estará oculto.</p>
+      <button class="btn" id="btn-sig">➡️ Seguir descendiendo</button>
+    </section>
+  `);
+  document.getElementById("btn-sig").onclick = () => {
+    estado.nivel++;
+    pantallaIntro(NIVELES[estado.nivel], false);
+  };
+  decir(azar(ADMIN.fragmento));
+}
+
+function pantallaFinNiveles() {
+  estado.tieneLlave = true;
+  estado.ocultarCodigo = false;
+  actualizarHUD();
+  const prev = prepararJefe();
+  const digitos = estado.codigo.split("").map(d => `<div class="slot-g">${d}</div>`).join("");
+  mostrar(`
+    <section class="tarjeta">
+      <div class="llave">🗝️</div>
+      <h1>¡Llave completa!</h1>
+      <p>Descifraste los ${LARGO_CODIGO} fragmentos. El código de la puerta final es:</p>
+      <div class="codigo-grande">${digitos}</div>
+      <p><b>Anótalo o memorízalo.</b> Delante de la puerta, el sistema lo ocultará. Revelarlo cuesta una vida.</p>
+      <div class="nota-corr">La mazmorra quedó <b>${NOMBRES_ETAPA[etapaDe(estado.corrupcion)].toLowerCase()}</b> (☣️ ${estado.corrupcion}%).<br>Al otro lado te esperan ${prev.extras > 0 ? `<b>${8 + prev.extras} preguntas</b>` : "<b>8 preguntas</b>"} y <b>${prev.tiempo} segundos</b>.</div>
+      <button class="btn" id="btn-puerta">🚪 Ir a la Puerta del Infierno</button>
+    </section>
+  `);
+  document.getElementById("btn-puerta").onclick = pantallaPuerta;
+  decir(ADMIN.llaveCompleta, 6000);
+}
+
+/* ---------- La Puerta del Infierno: teclear el código ---------- */
+function pantallaPuerta() {
+  pararTemporizador();
+  estado.enJefe = false;
+  estado.ocultarCodigo = true;
+  document.body.classList.remove("jefe");
+  document.body.classList.add("puerta");
+  actualizarHUD();
+
+  let entrada = "";
+  let intentos = INTENTOS_CODIGO;
+  let fin = Date.now() + TIEMPO_PUERTA * 1000;
+  let ultimoSeg = null;
+  let terminado = false;
+  let revelado = false;
+
+  mostrar(`
+    <section class="tarjeta puerta-card">
+      <h2>🔥 ÚLTIMA PUERTA 🔥</h2>
+      <h1>La Puerta del Infierno</h1>
+      <svg class="puerta-svg" id="puerta-svg" viewBox="0 0 220 270" aria-hidden="true">
+        <defs>
+          <radialGradient id="brasa" cx="50%" cy="65%" r="75%">
+            <stop offset="0" stop-color="#ff7a1a"/><stop offset=".55" stop-color="#a40000"/><stop offset="1" stop-color="#1a0000"/>
+          </radialGradient>
+          <radialGradient id="luzp" cx="50%" cy="60%" r="70%">
+            <stop offset="0" stop-color="#fff3b0"/><stop offset=".5" stop-color="#ff7a00"/><stop offset="1" stop-color="#7a0000"/>
+          </radialGradient>
+        </defs>
+        <path d="M14 262 V104 A96 96 0 0 1 206 104 V262 Z" fill="#0d0505" stroke="#5a0d10" stroke-width="7"/>
+        <path class="luz-puerta" d="M26 262 V106 A84 84 0 0 1 194 106 V262 Z" fill="url(#luzp)"/>
+        <g class="hoja izq">
+          <path d="M26 262 V106 A84 84 0 0 1 110 22 V262 Z" fill="url(#brasa)" stroke="#2a0305" stroke-width="3"/>
+          <circle cx="98" cy="190" r="5" fill="#d4a73a"/>
+        </g>
+        <g class="hoja der">
+          <path d="M110 22 A84 84 0 0 1 194 106 V262 H110 Z" fill="url(#brasa)" stroke="#2a0305" stroke-width="3"/>
+          <circle cx="122" cy="190" r="5" fill="#d4a73a"/>
+        </g>
+        <g class="cadenas" opacity=".85">
+          <path d="M26 74 L194 206" stroke="#8a8a8a" stroke-width="5" stroke-dasharray="9 5"/>
+          <path d="M194 74 L26 206" stroke="#8a8a8a" stroke-width="5" stroke-dasharray="9 5"/>
+        </g>
+        <g class="penta">
+          <circle cx="110" cy="128" r="46" fill="none" stroke="#ffb199" stroke-width="2.5"/>
+          <polygon transform="rotate(180 110 128)" points="110,86 134.7,162 70.1,115 149.9,115 85.3,162" fill="none" stroke="#ff4b4b" stroke-width="3" stroke-linejoin="round"/>
+        </g>
+      </svg>
+      <div class="reloj-puerta">
+        <div>⏳ <span id="t-puerta">${TIEMPO_PUERTA}</span> s</div>
+        <div class="barra" style="max-width:320px;margin:4px auto"><div id="barra-puerta"></div></div>
+      </div>
+      <div class="slots-codigo" id="slots"></div>
+      <p id="msg-puerta">Teclea el código de ${LARGO_CODIGO} dígitos. Intentos: ${INTENTOS_CODIGO}</p>
+      <div class="teclado" id="teclado"></div>
+      <button class="btn-mini" id="btn-revelar">👁️ Revelar el código (−1 vida, +${CORRUPCION_REVELAR}% ☣️)</button>
+    </section>
+  `);
+
+  const $slots = document.getElementById("slots");
+  const $msg = document.getElementById("msg-puerta");
+  const $t = document.getElementById("t-puerta");
+  const $barra = document.getElementById("barra-puerta");
+  const $svg = document.getElementById("puerta-svg");
+  const $teclado = document.getElementById("teclado");
+  const $revelar = document.getElementById("btn-revelar");
+
+  function pintar() {
+    $slots.innerHTML = Array.from({ length: LARGO_CODIGO }, (_, i) => {
+      const ch = entrada[i];
+      return `<div class="dig ${i === entrada.length ? "activo" : ""}">${ch !== undefined ? ch : ""}</div>`;
+    }).join("");
+  }
+
+  function pulsar(d) {
+    if (terminado || entrada.length >= LARGO_CODIGO) return;
+    entrada += d;
+    sonidoTecla();
+    pintar();
+    if (entrada.length === LARGO_CODIGO) setTimeout(probar, 250);
+  }
+  function borrar() { if (terminado) return; entrada = entrada.slice(0, -1); pintar(); }
+  function limpiar() { if (terminado) return; entrada = ""; pintar(); }
+
+  ["1", "2", "3", "4", "5", "6", "7", "8", "9", "C", "0", "⌫"].forEach(t => {
+    const b = document.createElement("button");
+    b.className = "tecla";
+    b.textContent = t;
+    b.onclick = () => (t === "C" ? limpiar() : t === "⌫" ? borrar() : pulsar(t));
+    $teclado.appendChild(b);
+  });
+
+  function probar() {
+    if (terminado || entrada.length !== LARGO_CODIGO) return;
+    if (entrada === estado.codigo) return abrir();
+    intentos--;
+    log("ERROR", `AccesoDenegadoException: código incorrecto (${intentos} intentos restantes)`);
+    sonidoMal();
+    activar("dano", 950);
+    sacudirPantalla();
+    entrada = "";
+    pintar();
+    if (intentos <= 0) {
+      terminado = true;
+      pararTemporizador();
+      corromper(CORRUPCION_CODIGO, "código incorrecto");
+      explotar({ tipo: "puerta" });
+    } else {
+      $msg.innerHTML = `❌ Código incorrecto. Intentos restantes: <b>${intentos}</b>`;
+      decir(azar(ADMIN.codigoMal));
+      corromper(CORRUPCION_CODIGO, "código incorrecto");
+    }
+  }
+
+  function abrir() {
+    terminado = true;
+    pararTemporizador();
+    $svg.classList.add("abierta");
+    $msg.textContent = "🔓 ¡La puerta se abre!";
+    sonidoPuerta();
+    log("INFO", "Puerta del Infierno: ACCESS GRANTED");
+    decir(azar(ADMIN.puertaAbre));
+    setTimeout(() => {
+      activar("rayo", 700);
+      sacudirPantalla();
+      particulas(innerWidth / 2, innerHeight / 2, ["🔥", "💀", "👹", "🩸"], 32, 320);
+    }, 600);
+    setTimeout(() => pantallaIntro(prepararJefe(), true), 2400);
+  }
+
+  $revelar.onclick = () => {
+    if (terminado || revelado) return;
+    revelado = true;
+    $revelar.disabled = true;
+    estado.vidas = Math.max(0, estado.vidas - 1);
+    estado.ocultarCodigo = false;
+    actualizarHUD();
+    efectoDano($revelar);
+    $msg.innerHTML = `👁️ El código es <b style="color:#ffe27a;letter-spacing:4px">${estado.codigo}</b>`;
+    log("WARN", "código revelado a cambio de una vida");
+    if (estado.vidas <= 0) {
+      terminado = true;
+      pararTemporizador();
+      corromper(CORRUPCION_REVELAR, "pacto: revelar código");
+      setTimeout(pantallaGameOver, 1100);
+    } else {
+      decir(azar(ADMIN.revelar));
+      corromper(CORRUPCION_REVELAR, "pacto: revelar código");
+    }
+  };
+
+  function tick() {
+    const restante = fin - Date.now();
+    $t.textContent = formatear(restante / 1000);
+    $barra.style.width = Math.max(0, restante / (TIEMPO_PUERTA * 1000) * 100) + "%";
+    const peligro = restante <= 10000;
+    $t.classList.toggle("rojo", peligro);
+    $barra.classList.toggle("rojo", peligro);
+    document.body.classList.toggle("alerta", peligro);
+    if (peligro) {
+      const seg = Math.ceil(restante / 1000);
+      if (seg !== ultimoSeg && seg > 0) { ultimoSeg = seg; sonidoTic(); }
+    }
+    if (restante <= 0 && !terminado) {
+      terminado = true;
+      pararTemporizador();
+      explotar({ tipo: "puerta" });
+    }
+  }
+
+  function teclado(e) {
+    if (!document.body.contains($slots)) { document.removeEventListener("keydown", teclado); return; }
+    if (e.key.length === 1 && e.key >= "0" && e.key <= "9") pulsar(e.key);
+    else if (e.key === "Backspace") borrar();
+  }
+  document.addEventListener("keydown", teclado);
+
+  pintar();
+  tick();
+  temporizador = setInterval(tick, 100);
+  decir(azar(ADMIN.puerta));
+}
+
+/* ---------- Final ---------- */
+function pantallaGameOver() {
+  pararTemporizador();
+  limpiarClasesEscena();
+  estado.enJefe = false;
+  estado.ocultarCodigo = false;
+  actualizarHUD();
+  log("ERROR", "GAME OVER");
+  mostrar(`
+    <section class="tarjeta game-over">
+      <div class="grande">💀</div>
+      <h1>GAME OVER</h1>
+      <p>Tu alma se une a las demás en la mazmorra…</p>
+      <div class="datos">
+        <div class="dato">❌ Errores: ${estado.errores}</div>
+        <div class="dato">💣 Bombas: ${estado.explosiones}</div>
+        <div class="dato">☣️ Corrupción: ${estado.corrupcion}%</div>
+      </div>
+      <button class="btn" id="btn-de-nuevo">🔁 Intentarlo otra vez</button>
+    </section>
+  `);
+  document.getElementById("btn-de-nuevo").onclick = () => {
+    reiniciarEstado();
+    pantallaIntro(NIVELES[0], false);
+  };
+  decir(azar(ADMIN.gameOver));
+}
+
+function pantallaVictoria() {
+  pararTemporizador();
+  limpiarClasesEscena();
+  estado.enJefe = false;
+  estado.ocultarCodigo = false;
+  actualizarHUD();
+  sonidoVictoria();
+  const reg = cargarRegistro();
+  reg.victorias = (reg.victorias || 0) + 1;
+  reg.mejorCorrupcion = reg.mejorCorrupcion == null ? estado.corrupcion : Math.min(reg.mejorCorrupcion, estado.corrupcion);
+  guardarRegistro(reg);
+  log("INFO", "Puerta del Infierno derrotada · TROFEO DESBLOQUEADO");
+  mostrar(`
+    <section class="tarjeta">
+      <div class="trofeo">🏆</div>
+      <h1>¡Sobreviviste a la mazmorra!</h1>
+      <p>Los tres sellos se rompieron y la maldición terminó. Ganaste el trofeo con las <b>dos piezas del rompecabezas</b>.</p>
+      <svg class="rompecabezas" viewBox="-40 -10 280 120">
+        <g class="pieza sep-izq" id="pieza1">
+          <path d="M0 0 H100 V32 A19 19 0 1 1 100 68 V100 H0 Z" fill="#d9c9a6" stroke="#fff6dd" stroke-width="3" stroke-linejoin="round"/>
+          <text class="pieza-texto" x="38" y="55">Pieza 1</text>
+        </g>
+        <g class="pieza sep-der" id="pieza2">
+          <path d="M100 0 H200 V100 H100 V68 A19 19 0 1 0 100 32 Z" fill="#ff7a1a" stroke="#fff6dd" stroke-width="3" stroke-linejoin="round"/>
+          <text class="pieza-texto" x="132" y="55">Pieza 2</text>
+        </g>
+      </svg>
+      <div class="datos">
+        <div class="dato">❌ Errores: ${estado.errores}</div>
+        <div class="dato">💣 Bombas: ${estado.explosiones}</div>
+        <div class="dato">☣️ Corrupción final: ${estado.corrupcion}%</div>
+      </div>
+      <p>🧩 ¡Únelas para completar el rompecabezas! 🧩</p>
+      <button class="btn" id="btn-reiniciar">🔁 Jugar de nuevo</button>
+    </section>
+  `);
+  setTimeout(() => {
+    const p1 = document.getElementById("pieza1");
+    const p2 = document.getElementById("pieza2");
+    if (p1 && p2) { p1.classList.remove("sep-izq"); p2.classList.remove("sep-der"); }
+  }, 1200);
+  lluviaFestiva();
+  document.getElementById("btn-reiniciar").onclick = pantallaInicio;
+  decir(azar(ADMIN.victoria));
+}
+
+/* ---------- ¡A jugar! ---------- */
+crearAmbiente();
+iniciarEfectosGlobales();
+aplicarCorrupcion();
+pantallaInicio();
+</script>
+</body>
+</html>
