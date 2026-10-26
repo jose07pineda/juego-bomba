@@ -649,7 +649,7 @@
 /* =====================================================================
    CONFIGURACIÓN DEL JUEGO  (aquí puedes editar todo fácilmente)
    ---------------------------------------------------------------------
-   - tiempo: segundos que tiene el nivel para responder TODAS las preguntas
+   - tiempo: segundos que tiene el nivel para responder TODAS las preguntas (300 = 5 minutos)
    - preguntas: { p: pregunta, r: [opciones], c: posición de la correcta (0 = la primera) }
      (las opciones se mezclan solas cada vez que sale la pregunta)
    - llave: true  → es la «Pregunta de la Llave» (la última de la sala, revela un dígito del código)
@@ -679,7 +679,7 @@ const TIEMPO_MINIMO_JEFE = 45;
 
 const NIVELES = [
   {
-    nombre: "El Cementerio de los Bugs", emoji: "🪦", tema: "🎃 Halloween + 🐛 Análisis de software", tiempo: 90,
+    nombre: "El Cementerio de los Bugs", emoji: "🪦", tema: "🎃 Halloween + 🐛 Análisis de software", tiempo: 300,
     admin: "Sala 1. Aquí enterré mis primeros bugs. Algunos todavía se mueven.",
     preguntas: [
       { p: "¿Qué antigua festividad celta es el origen de Halloween?", r: ["Samhain", "Beltane", "Imbolc", "Lughnasadh"], c: 0 },
@@ -690,7 +690,7 @@ const NIVELES = [
     ]
   },
   {
-    nombre: "La Biblioteca de los Requisitos Malditos", emoji: "📜", tema: "📜 Historia + 📐 Requisitos y UML", tiempo: 85,
+    nombre: "La Biblioteca de los Requisitos Malditos", emoji: "📜", tema: "📜 Historia + 📐 Requisitos y UML", tiempo: 300,
     admin: "Sala 2. Los requisitos cambiaron a mitad del proyecto… y a mitad de tu vida.",
     preguntas: [
       { p: "¿Qué tratado de 1494 repartió el Nuevo Mundo entre España y Portugal?", r: ["Tordesillas", "Utrecht", "Westfalia", "Versalles"], c: 0 },
@@ -701,7 +701,7 @@ const NIVELES = [
     ]
   },
   {
-    nombre: "El Laboratorio del Código Maldito", emoji: "🤖", tema: "🤖 Inteligencia artificial + 🧪 Pruebas de software", tiempo: 80,
+    nombre: "El Laboratorio del Código Maldito", emoji: "🤖", tema: "🤖 Inteligencia artificial + 🧪 Pruebas de software", tiempo: 300,
     admin: "Sala 3. Aquí entrené modelos y probé cosas que nunca debieron compilar.",
     preguntas: [
       { p: "¿Cómo se llamaba el primer chatbot de la historia, creado en el MIT en 1966?", r: ["ELIZA", "ALICE", "PARRY", "SHRDLU"], c: 0 },
@@ -712,7 +712,7 @@ const NIVELES = [
     ]
   },
   {
-    nombre: "La Cripta de los Patrones Oscuros", emoji: "🧟", tema: "🧟 Terror + 🧱 Diseño y arquitectura", tiempo: 75,
+    nombre: "La Cripta de los Patrones Oscuros", emoji: "🧟", tema: "🧟 Terror + 🧱 Diseño y arquitectura", tiempo: 300,
     admin: "Sala 4. Patrones de diseño… y patrones de pesadilla. Respira hondo.",
     preguntas: [
       { p: "¿Qué volcán provocó el «año sin verano» de 1816, durante el cual nació la idea de «Frankenstein»?", r: ["Tambora", "Krakatoa", "Vesubio", "Santorini"], c: 0 },
@@ -723,7 +723,7 @@ const NIVELES = [
     ]
   },
   {
-    nombre: "El Salón de las Almas Compiladas", emoji: "👻", tema: "👻 Todo mezclado + ⚙️ Gestión de software", tiempo: 70,
+    nombre: "El Salón de las Almas Compiladas", emoji: "👻", tema: "👻 Todo mezclado + ⚙️ Gestión de software", tiempo: 300,
     admin: "Sala 5. Mi obra maestra. Cero documentación, infinitos fantasmas.",
     preguntas: [
       { p: "¿Qué gobernante de Valaquia, apodado «el Empalador», inspiró en parte a Drácula?", r: ["Vlad III", "Esteban III de Moldavia", "Matías Corvino", "Mehmed II"], c: 0 },
@@ -1115,6 +1115,20 @@ function formatear(seg) {
   return Math.max(0, Math.ceil(seg));
 }
 
+// Conteo de la bomba en minutos:segundos (ej. 300 → 5:00)
+function formatearMinutos(seg) {
+  const s = Math.max(0, Math.ceil(seg));
+  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+}
+
+// Texto de la duración para las tarjetas (ej. 300 → "5 minutos")
+function textoDuracion(seg) {
+  if (seg < 60) return seg + " segundos";
+  const m = Math.floor(seg / 60);
+  const s = seg % 60;
+  return m + (m === 1 ? " minuto" : " minutos") + (s ? " " + s + " s" : "");
+}
+
 function limpiarClasesEscena() {
   document.body.classList.remove("jefe", "puerta", "alerta");
 }
@@ -1305,7 +1319,7 @@ function pantallaIntro(def, esJefe) {
       <div class="datos">
         <div class="dato">${def.tema}</div>
         <div class="dato">❓ ${def.preguntas.length} preguntas</div>
-        <div class="dato">⏳ ${def.tiempo} segundos</div>
+        <div class="dato">⏳ ${textoDuracion(def.tiempo)}</div>
         <div class="dato">${"🎃".repeat(estado.vidas)} ${estado.vidas} ${estado.vidas === 1 ? "vida" : "vidas"}</div>
       </div>
       <button class="btn" id="btn-go">💣 ¡Empezar!</button>
@@ -1352,7 +1366,7 @@ function jugar(def, esJefe) {
           </g>
         </svg>
         <div class="reloj">
-          <div id="tiempo">${def.tiempo}</div>
+          <div id="tiempo">${formatearMinutos(def.tiempo)}</div>
           <div class="barra"><div id="barra-tiempo"></div></div>
         </div>
       </div>
@@ -1498,7 +1512,7 @@ function jugar(def, esJefe) {
   function tick() {
     const restante = fin - Date.now();
     const fraccion = restante / duracion;
-    $tiempo.textContent = formatear(restante / 1000);
+    $tiempo.textContent = formatearMinutos(restante / 1000);
     $barra.style.width = Math.max(0, fraccion * 100) + "%";
     dibujarMecha(fraccion);
     const peligro = restante <= 10000;
